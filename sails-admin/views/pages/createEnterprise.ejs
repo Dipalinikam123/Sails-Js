@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Create Enterprise</title>
+    <link rel="stylesheet" href="/styles.css"> <!-- Link to your stylesheet -->
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+        }
+
+        .form-container {
+            background-color: #fff;
+            padding: 20px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+            border-radius: 5px;
+            width: 400px;
+        }
+
+        h1 {
+            text-align: center;
+        }
+
+        label {
+            display: block;
+            margin: 10px 0 5px;
+        }
+
+        input {
+            width: 100%;
+            padding: 8px;
+            margin-bottom: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+
+        button {
+            width: 100%;
+            padding: 10px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background-color: #45a049;
+        }
+    </style>
+</head>
+<body>
+    <div class="form-container">
+        <h1>Create Enterprise</h1>
+        <form action="/api/enterprise" method="POST">
+            <label for="name">Enterprise Name:</label>
+            <input type="text" id="name" name="name" required>
+
+            <label for="logo">Logo URL:</label>
+            <input type="text" id="logo" name="logo">
+
+            <label for="employeeCount">Employee Count:</label>
+            <input type="number" id="employeeCount" name="employeeCount" required>
+
+            <h2>Manager Details</h2>
+            <label for="managerName">Manager Name:</label>
+            <input type="text" id="managerName" name="manager[name]" required>
+
+            <label for="managerEmail">Manager Email:</label>
+            <input type="email" id="managerEmail" name="manager[email]" required>
+
+            <label for="managerDepartment">Manager Department:</label>
+            <input type="text" id="managerDepartment" name="manager[department]" required>
+
+            <button type="submit">Create Enterprise</button>
+        </form>
+    </div>
+</body>
+</html>

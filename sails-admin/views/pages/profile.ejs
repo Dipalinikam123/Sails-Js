@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>User Profile</title>
+  <link rel="stylesheet" href="/styles.css">
+</head>
+<body>
+  <div class="profile-container" id="profileContainer" style="display: none;">
+    <h1>User Profile</h1>
+    <div id="profile-info">
+      <p><strong>Name:</strong> <span id="userName"><%= user.name %></span></p>
+      <p><strong>Email:</strong> <span id="userEmail"><%= user.email %></span></p>
+      <p><strong>Role:</strong> <span id="userRole"><%= user.role %></span></p>
+      <p><strong>Enterprise ID:</strong> <span id="userEnterpriseId"><%= user.enterpriseId %></span></p>
+    </div>
+    <button id="logout">Logout</button>
+  </div>
+  
+  <script>
+    // Client-side check for token
+    const token = localStorage.getItem('authToken');
+    if (token) {
+      document.getElementById('profileContainer').style.display = 'block';
+    } else {
+      window.location.href = '/login'; 
+    }
+
+    document.getElementById('logout').addEventListener('click', () => {
+      localStorage.removeItem('authToken'); 
+      window.location.href = '/login'; 
+    });
+  </script>
+</body>
+</html>

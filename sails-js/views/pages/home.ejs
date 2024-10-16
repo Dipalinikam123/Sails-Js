@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link href="" rel="stylesheet" />
+    <title>Hello</title>
+</head>
+
+<body>
+    <h1>EJS</h1>
+
+    <% let people=['reddy', 'neil' , 'alex' ]; %> <!-- Scriptlet tag, for control-flow, no output -->
+        <p>People: <%= people.join(", "); %></p>    <!-- Outputs the value into the template (HTML escaped) -->
+    
+        <ul>
+            
+            <%# people Map %> <!-- comment -->
+            <% people.map((e,i)=>{ %>
+                <li><%= e %></li>
+           <% }) %>
+        </ul>
+<!-- ================================================================= -->
+
+        <% if(people[1]=== 'neil'){ %>
+            <p><%= people[1] %></p>
+         <% } else{%>
+            <p>not found</p>
+        <% } %>
+        
+<!-- ================================================================= -->
+
+
+      <ul>
+        <%_ for (let i = 0; i < people.length; i++) { _%> <!-- Loop through the array -->
+            <li><%= people[i] %></li> <!-- Output each person's name -->
+        <%_ } _%>
+        </ul>
+
+
+
+</body>
+
+</html>
