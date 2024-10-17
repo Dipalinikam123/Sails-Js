@@ -17,7 +17,7 @@ module.exports.policies = {
   UserController: {
     getAllUser: 'isLoggedIn',
     deleteUser:'isLoggedIn',
-    userProfile:'isToken'
+    userProfile:['isToken']
   },
   /***************************************************************************
   *                                                                          *

@@ -5,11 +5,12 @@ const secretKey = process.env.SECRET_KEY; // Replace with your actual secret key
 
 module.exports = {
   signup: async function (req, res) {
+    console.log('req-----', req.body);
     try {
       const { name, email, password, role, enterpriseId } = req.body;
 
       // Check if all required fields are present
-      if (!name || !email || !password || !role || !enterpriseId) {
+      if (!name || !email || !password || !enterpriseId) {
         return res.status(400).json({ success: false, message: 'Fields are require...' });
       }
       const existingUser = await User.findOne({ email });
@@ -33,7 +34,10 @@ module.exports = {
       await User.updateOne({ id: newUser.id }).set({ token });
 
       // res.status(201).json({ success: true, token });
-      return res.view('pages/dashboard', { token: token, id: newUser.id, role: newUser.role });
+      req.body.addedBy === 'superAdmin' &&  res.redirect(`/enterpriselist/${newUser.enterpriseId}`);
+      req.body.addedBy === 'admin' &&  res.redirect(`/adminenterprise?id=${newUser.enterpriseId}`);
+
+      return res.view('pages/dashboard', { token: token, user:user });
 
     } catch (error) {
       console.log(error);
@@ -43,7 +47,7 @@ module.exports = {
   register: async function (req, res) {
     try {
       const enterprise = await Enterprise.find().select(['id', 'name']);
-      return res.view('pages/register', {
+      return res.view('pages/userRegister', {
         enterprise: enterprise,
       });
     } catch (error) {
@@ -68,7 +72,7 @@ module.exports = {
       await User.updateOne({ id: user.id }).set({ token });
 
       // return res.status(200).json({ message: 'login successfull', token });
-      return res.view('pages/dashboard', { token: token, id: user.id, role: user.role });
+      return res.view('pages/dashboard', { token: token,user:user});
     } catch (error) {
       // console.error('Signin error:', error);
       return res.status(500).json({ message: 'login fail', error });

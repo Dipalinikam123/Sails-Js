@@ -1,18 +1,17 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <link href="" rel="stylesheet" />
-  <title></title>
+  <title>Add User</title>
   <style>
-    .main-div{
+    .main-div {
       background-color: #f4f4f4;
     }
+
     .table-div {
       font-family: Arial, sans-serif;
-    
       margin: 0;
       padding: 20px;
       display: flex;
@@ -32,14 +31,13 @@
     th,
     td {
       padding: 12px;
-      text-align: left;
+      text-align: center;
       border-bottom: 1px solid #ddd;
     }
 
     th {
-      background-color: #4CAF50;
+      background-color: #4caf50;
       color: white;
-      font-weight: bold;
     }
 
     tr:nth-child(even) {
@@ -50,61 +48,199 @@
       background-color: #e0e0e0;
     }
 
-    th,
-    td {
-      text-align: center;
+    button {
+      padding: 10px 15px;
+      background-color: #4caf50;
+      color: white;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
     }
 
-    .logo {
-      max-width: 100px;
-      max-height: 50px;
+    /* Modal styles */
+    .modal {
+      display: none;
+      position: fixed;
+      z-index: 1;
+      left: 0;
+      top: 0;
+      width: 100%;
+      height: 100%;
+      background-color: rgba(0, 0, 0, 0.5);
     }
-    button{
-      padding: 10px 15px;
-      background-color: #4CAF50;
-      color: white;
-      border-radius: 5px;
+
+    .modal-content {
+      background-color: #fefefe;
+      margin: 10% auto;
+      padding: 20px;
+      border: 1px solid #888;
+      width: 50%;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    }
+
+    .close {
+      color: #aaa;
+      float: right;
+      font-size: 28px;
+      font-weight: bold;
+    }
+
+    .close:hover,
+    .close:focus {
+      color: black;
+      text-decoration: none;
+      cursor: pointer;
     }
   </style>
 </head>
 
 <body>
-  <%= console.log("---enterpriseId",enterpriseUsers) %>
-    <div class="main-div">
-      <button onclick="window.location.href='/register'">Add User</button>
-      <div class="table-div">
-        <table>
-          <thead>
-            <tr>
-              <th>Name</th>
-              <th>Email</th>
-              <th>Role</th>
-              <th>enterpriseId</th>
 
-
-            </tr>
-          </thead>
-          <tbody>
-            <% enterpriseUsers.map(e=> { %>
+  <div class="main-div">
+    <button id="addUserBtn">Add User</button>
+    <div class="table-div">
+      <table>
+        <thead>
+          <tr>
+            <th>Name</th>
+            <th>Email</th>
+            <th>Role</th>
+            <th>Enterprise ID</th>
+            <th>Action</th>
+            <th>Action</th>
+          </tr>
+        </thead>
+        <tbody>
+          <% if (Array.isArray(user) && user.length) { %>
+            <% user.forEach(e => { %>
               <tr>
+                <td><%= e.name %></td>
+                <td><%= e.email %></td>
+                <td><%= e.role %></td>
+                <td><%= e.enterpriseId %></td>
                 <td>
-                  <%= e.name %>
+                  <button class="editProfileBtn" data-id="<%= e.id %>" 
+                          data-name="<%= e.name %>" 
+                          data-email="<%= e.email %>" 
+                          data-role="<%= e.role %>" 
+                          data-enterpriseId="<%= e.enterpriseId %>">Update</button>
                 </td>
                 <td>
-                  <%= e.email %>
-                </td>
-                <td>
-                  <%= e.role %>
-                </td>
-                <td>
-                  <%= e.enterpriseId %>
+                  <button>Remove</button>
                 </td>
               </tr>
-              <% }) %>
-          </tbody>
-        </table>
-      </div>
+            <% }) %>
+          <% } else { %>
+            <tr>
+              <td colspan="6">No users found.</td>
+            </tr>
+          <% } %>
+        </tbody>
+      </table>
     </div>
+  </div>
+
+  <!-- user Create Modal -->
+  <div id="userModal" class="modal">
+    <div class="modal-content">
+      <span class="close" id="closeUserModal">&times;</span>
+      <h2>Add User</h2>
+      <form action="/api/signup" method="POST">
+        <label for="name">Name:</label>
+        <input type="text" id="name" name="name" required><br><br>
+        <label for="email">Email:</label>
+        <input type="email" id="email" name="email" required><br><br>
+        <label for="role">Role:</label>
+        <input type="text" id="role" name="role" required><br><br>
+        <label for="password">Password:</label>
+        <input type="password" id="password" name="password" required><br><br>
+        <input type="hidden" id="enterpriseId" name="enterpriseId" value="<%= enterpriseId %>" readonly><br><br>
+        <input type="hidden" id="addedBy" name="addedBy" value="superAdmin">
+        <button type="submit">Submit</button>
+      </form>
+    </div>
+  </div>
+
+  <!-- Modal for Editing User Profile -->
+  <div id="editModal" class="modal">
+    <div class="modal-content">
+      <span class="close" id="closeEditModal">&times;</span>
+      <h2>Edit Profile</h2>
+      <form id="editForm" method="POST">
+        <label for="editName">Name:</label>
+        <input type="text" id="editName" name="name" required>
+
+        <label for="editEmail">Email:</label>
+        <input type="email" id="editEmail" name="email" required>
+
+        <label for="editRole">Role:</label>
+        <input type="text" id="editRole" name="role" required>
+
+        <!-- <label for="editEnterpriseId">Enterprise ID:</label> -->
+        <input type="hidden" id="editEnterpriseId" name="enterpriseId" value="<%= enterpriseId %>" required>
+        <input type="hidden" id="addedBy" name="addedBy" value="superAdmin">
+        <button type="submit" class="button" style="background-color: #28a745;">Save Changes</button>
+      </form>
+    </div>
+  </div>
+
+  <script>
+    // Open user creation modal
+    const modal = document.getElementById("userModal");
+    const btn = document.getElementById("addUserBtn");
+    const closeModal = document.getElementById("closeUserModal");
+
+    btn.onclick = function () {
+      modal.style.display = "block";
+    }
+
+    closeModal.onclick = function () {
+      modal.style.display = "none";
+    }
+
+    window.onclick = function (event) {
+      if (event.target === modal) {
+        modal.style.display = "none";
+      }
+    }
+
+    // Open edit modal for user
+    const editButtons = document.querySelectorAll(".editProfileBtn");
+    const editModal = document.getElementById("editModal");
+    const closeEditModal = document.getElementById("closeEditModal");
+
+    editButtons.forEach(button => {
+      button.onclick = function () {
+        const userId = button.getAttribute("data-id");
+        const userName = button.getAttribute("data-name");
+        const userEmail = button.getAttribute("data-email");
+        const userRole = button.getAttribute("data-role");
+        const userEnterpriseId = button.getAttribute("data-enterpriseId");
+
+        // Populate the edit modal with user data
+        document.getElementById("editName").value = userName;
+        document.getElementById("editEmail").value = userEmail;
+        document.getElementById("editRole").value = userRole;
+        document.getElementById("editEnterpriseId").value = userEnterpriseId;
+
+        // Set the form action to the update endpoint
+        const editForm = document.getElementById("editForm");
+        editForm.action = `/api/user/${userId}`; // Corrected action assignment
+
+        editModal.style.display = "block";
+      }
+    });
+
+    closeEditModal.onclick = function () {
+      editModal.style.display = "none";
+    }
+
+    window.onclick = function (event) {
+      if (event.target === editModal) {
+        editModal.style.display = "none";
+      }
+    };
+  </script>
 </body>
 
 </html>

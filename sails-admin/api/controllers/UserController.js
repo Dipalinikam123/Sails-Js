@@ -1,75 +1,5 @@
 
 module.exports = {
-  // signup: async function (req, res) {
-  //   try {
-  //     const { name, email, password, role, enterpriseId } = req.body;
-
-  //     // Check if all required fields are present
-  //     if (!name || !email || !password || !role || !enterpriseId) {
-  //       return res.status(400).json({ success: false, message: 'Fields are require' });
-  //     }
-
-  //     const hash = await bcrypt.hash(password, 10);
-
-  //     const newUser = await User.create({
-  //       name,
-  //       email,
-  //       password: hash,
-  //       role,
-  //       enterpriseId,
-  //     }).fetch();
-  //     const token = jwt.sign({ _id: newUser.id, email: newUser.email }, secretKey);
-
-  //     newUser.token = token;
-  //     await User.updateOne({ id: newUser.id }).set({ token });
-
-  //     // res.status(201).json({ success: true, token });
-  //     return res.redirect('/dashboard');
-
-  //   } catch (error) {
-  //     console.log(error);
-  //     res.status(500).json({ success: false, message: error.message });
-  //   }
-  // },
-  // register: async function (req, res) {
-  //   try {
-  //     const enterprise = await Enterprise.find().select(['id', 'name']);
-  //     return res.view('pages/register', {
-  //       enterprise: enterprise,
-  //     });
-  //   } catch (error) {
-  //     // console.error('Failed to retrieve users:', error);
-  //     return res.status(500).json({ message: 'Fail To get enterprise', error });
-  //   }
-  // },
-  // signin: async function (req, res) {
-  //   try {
-  //     // Check if the user exists
-  //     const user = await User.findOne({ email: req.body.email });
-  //     if (!user) {
-  //       return res.status(401).json({ message: USER_NOT_FOUND });
-  //     }
-
-  //     // Verify password
-  //     const isAuth = bcrypt.compareSync(req.body.password, user.password);
-  //     if (!isAuth) {
-  //       return res.status(401).json({ message:'incorrect password' });
-  //     }
-
-  //     // Generate a token upon successful authentication
-  //     const token = jwt.sign({ email: req.body.email, _id: user.id }, secretKey);
-
-  //     // Save the token to the user's record
-  //     await User.updateOne({ id: user.id }).set({ token });
-
-  //     // Respond with the token
-  //     return res.status(200).json({ message: 'login successfull', token });
-  //   } catch (error) {
-  //     // console.error('Signin error:', error);
-  //     return res.status(500).json({ message: 'login fail', error });
-  //   }
-  // },
-
   getAllUser: async function (req, res) {
     try {
       const users = await User.find();
@@ -100,8 +30,8 @@ module.exports = {
     }
   },
   userProfile: async function (req, res) {
-    console.log('===req.params',req.query.id);
-    const userId = req.query.id;
+    console.log('===req.params', req.params.id);
+    const userId = req.params.id;
     // console.log('===id', userId);
     try {
       const user = await User.findOne({ id: userId }); // Use `id` instead of `userId`
@@ -119,5 +49,36 @@ module.exports = {
       return res.status(500).json({ message: 'Failed to get user profile', error });
     }
   },
+
+  updateUser: async function (req, res) {
+    const id = req.params.id; // Get the user ID from request parameters
+    console.log('---updateUser id', id);
+    console.log('----update req body',req.body);
+
+    try {
+      // Find the user by ID
+      const user = await User.findOne({ id });
+      if (!user) {
+        return res.status(404).json({ message: 'User not found' });
+      }
+
+      // Update the user's properties with the request body
+      const updatedUser = await User.updateOne({ id }).set(req.body);
+
+      // Check who added the user and redirect accordingly
+      if (req.body.addedBy === 'superAdmin') {
+        return res.view('pages/enterpriseDetails', { user: updatedUser ,enterpriseId :user.enterpriseId});
+      }
+      //  else if (req.body.addedBy === 'admin') {
+      //   return res.redirect(`/adminenterprise?id=${updatedUser.enterpriseId}`); // Assuming you want to redirect
+      // }
+      else {
+        return res.view('pages/profile', { user:user,updatedUser: updatedUser });
+      }
+    } catch (error) {
+      return res.status(500).json({ message: 'Failed to update', error });
+    }
+  }
+
 };
 

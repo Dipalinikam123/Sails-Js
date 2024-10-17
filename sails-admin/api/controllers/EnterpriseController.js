@@ -35,6 +35,25 @@ module.exports = {
       return res.status(500).json({ message: 'fail to retrive interprise', error });
     }
   },
+  getAdminEnterprise: async function (req, res) {
+    const enterpriseId = req.query.id;
+    console.log('-----', enterpriseId);
+    try {
+      const enterprise = await Enterprise.findOne({ id: enterpriseId });
+      const user = await User.find({enterpriseId});
+      if (!enterprise) {
+        return res.status(404).json({ message: 'Enterprise not found' });
+      }
+      return res.view('pages/adminEnterprise', {
+        enterprise: enterprise,
+        user:user
+      });
+    } catch (error) {
+      console.error('Failed to retrieve enterprise:', error);
+      return res.status(500).json({ message: 'Failed to retrieve enterprise', error });
+    }
+
+  },
   getEnterpriseList: async function (req, res) {
     try {
       // Fetch all Interprice from the database
@@ -52,12 +71,11 @@ module.exports = {
     console.log('----Enterprise ID detail:', enterpriseId);
 
     try {
-      // Fetch users associated with the specified enterprise ID
       const enterpriseUsers = await User.find({ enterpriseId });
 
-      // Pass the filtered list of users to the view
       return res.view('pages/enterpriseDetails', {
-        enterpriseUsers: enterpriseUsers,
+        user: enterpriseUsers,
+        enterpriseId: enterpriseId,
       });
     } catch (error) {
       console.error('Failed to retrieve users for enterprise:', error);

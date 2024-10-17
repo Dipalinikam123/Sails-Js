@@ -32,19 +32,24 @@
   </script>
   <h1>Dashboard</h1>
 
-  <%= console.log('----role', role) %>
+  <%= console.log('----user d', user) %>
 
-    <% if(role===0){ %>
+    <% if(user.role===0){ %>
       <ul>
-        <li><a href="/userprofile?id=<%= id %>">User Profile</a></li>
-        <li><a href="/enterpriselist">Enterprise</a></li>
+        <li><a href="/userprofile/<%= user.id %>">User Profile</a></li>
+        <li><a href="/enterpriselist">Enterprise List</a></li>
       </ul>
 
-      <% }else{ %>
+      <% }else if(user.role===1){ %>
         <ul>
-          <li><a href="/userprofile?id=<%= id %>">User Profile</a></li>
-        </ul>
-        <% } %>
+          <li><a href="/userprofile/<%= user.id %>">User Profile</a></li>
+          <li><a href="/adminenterprise?id=<%= user.enterpriseId %>">Enterprise</a></li>
+    
+      <% }else{ %>
+          <ul>
+            <li><a href="/userprofile/<%= user.id %>">User Profile</a></li>
+          </ul>
+      <% } %>
 </body>
 
 </html>
