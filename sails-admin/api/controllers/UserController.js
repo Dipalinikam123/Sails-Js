@@ -53,7 +53,7 @@ module.exports = {
   updateUser: async function (req, res) {
     const id = req.params.id; // Get the user ID from request parameters
     console.log('---updateUser id', id);
-    console.log('----update req body',req.body);
+    console.log('----update req body', req.body);
 
     try {
       // Find the user by ID
@@ -67,13 +67,13 @@ module.exports = {
 
       // Check who added the user and redirect accordingly
       if (req.body.addedBy === 'superAdmin') {
-        return res.view('pages/enterpriseDetails', { user: updatedUser ,enterpriseId :user.enterpriseId});
+        return res.redirect(`/enterpriselist/${updatedUser.enterpriseId}`);
       }
       //  else if (req.body.addedBy === 'admin') {
       //   return res.redirect(`/adminenterprise?id=${updatedUser.enterpriseId}`); // Assuming you want to redirect
       // }
       else {
-        return res.view('pages/profile', { user:user,updatedUser: updatedUser });
+        return res.redirect(`/userprofile/${id}`);
       }
     } catch (error) {
       return res.status(500).json({ message: 'Failed to update', error });

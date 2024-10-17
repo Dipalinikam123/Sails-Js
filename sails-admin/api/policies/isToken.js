@@ -3,7 +3,7 @@ const jwt = require('jsonwebtoken');
 const secretKey = process.env.SECRET_KEY; // Replace with your actual secret key
 
 module.exports = async function (req, res, next) {
-  const token = req.query.id; // Get the token from the query parameter
+  const token = req.params.id; // Get the token from the query parameter
 
   if (!token) {
     return res.redirect('/login');

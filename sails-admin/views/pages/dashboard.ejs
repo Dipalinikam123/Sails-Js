@@ -43,7 +43,7 @@
       <% }else if(user.role===1){ %>
         <ul>
           <li><a href="/userprofile/<%= user.id %>">User Profile</a></li>
-          <li><a href="/adminenterprise?id=<%= user.enterpriseId %>">Enterprise</a></li>
+          <li><a href="/adminenterprise/<%= user.enterpriseId %>">Enterprise</a></li>
     
       <% }else{ %>
           <ul>

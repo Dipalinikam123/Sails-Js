@@ -32,7 +32,7 @@ module.exports.routes = {
   'GET /register':  'AuthController.register',
   'GET /enterpriselist':  'EnterpriseController.getEnterpriseList',
   'GET /enterpriselist/:id':  'EnterpriseController.getEnterpriseDetail',
-  'GET /adminenterprise':  'EnterpriseController.getAdminEnterprise',
+  'GET /adminenterprise/:id':  'EnterpriseController.getAdminEnterprise',
   'GET /dashboard': { view: 'pages/dashboard'},
   'GET /login':  {view:'pages/login'},
   'GET /createEnterprise':  {view:'pages/createEnterprise'},

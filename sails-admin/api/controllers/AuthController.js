@@ -35,7 +35,7 @@ module.exports = {
 
       // res.status(201).json({ success: true, token });
       req.body.addedBy === 'superAdmin' &&  res.redirect(`/enterpriselist/${newUser.enterpriseId}`);
-      req.body.addedBy === 'admin' &&  res.redirect(`/adminenterprise?id=${newUser.enterpriseId}`);
+      req.body.addedBy === 'admin' &&  res.redirect(`/adminenterprise/${newUser.enterpriseId}`);
 
       return res.view('pages/dashboard', { token: token, user:user });
 
