@@ -36,11 +36,11 @@ module.exports = {
     }
   },
   getAdminEnterprise: async function (req, res) {
-    const enterpriseId = req.query.id;
-    console.log('-----', enterpriseId);
+    const enterpriseId = req.params.id;
+    // console.log('-----', enterpriseId);
     try {
-      const enterprise = await Enterprise.findOne({ id: enterpriseId });
-      const user = await User.find({enterpriseId});
+      const enterprise = await Enterprise.findOne({ id: enterpriseId, });
+      const user = await User.find({enterpriseId,role: { '!=': 99 }});
       if (!enterprise) {
         return res.status(404).json({ message: 'Enterprise not found' });
       }
@@ -68,10 +68,10 @@ module.exports = {
   },
   getEnterpriseDetail: async function (req, res) {
     const enterpriseId = req.params.id;
-    console.log('----Enterprise ID detail:', enterpriseId);
+    // console.log('----Enterprise ID detail:', enterpriseId);
 
     try {
-      const enterpriseUsers = await User.find({ enterpriseId });
+      const enterpriseUsers = await User.find({ enterpriseId, role: { '!=': 99 }  });
 
       return res.view('pages/enterpriseDetails', {
         user: enterpriseUsers,

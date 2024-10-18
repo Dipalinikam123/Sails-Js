@@ -142,9 +142,11 @@
     }
 
     document.getElementById('logout').addEventListener('click', () => {
-      localStorage.removeItem('authToken');
-      window.location.href = '/login';
-    });
+            // Logout logic (can send a request to server to clear cookie)
+            localStorage.removeItem('authToken')
+            document.cookie = "authToken=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;"; // Clear the cookie
+            window.location.href = '/login'; // Redirect to login
+        });
 
     const editModal = document.getElementById("editModal");
     const editBtn = document.getElementById("editProfile");

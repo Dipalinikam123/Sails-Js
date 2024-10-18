@@ -15,9 +15,21 @@ module.exports.policies = {
 
   // UserController policies
   UserController: {
-    getAllUser: 'isLoggedIn',
+    '*': 'isLoggedIn',
     deleteUser:'isLoggedIn',
-    userProfile:['isToken']
+    updateUser:'isLoggedIn',
+    removeUser:'isLoggedIn',
+  },
+  DashboardController:{
+    dashboard:'isLoggedIn'
+  },
+  EnterpriseController: {
+    '*': 'isLoggedIn',
+    getAdminEnterprise:'isAdmin',
+    createEnterprise:'isSuperAdmin',
+    getEnterprise:'isSuperAdmin',
+    getEnterpriseList:'isSuperAdmin',
+    getEnterpriseDetail:'isSuperAdmin',
   },
   /***************************************************************************
   *                                                                          *

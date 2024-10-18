@@ -81,49 +81,63 @@
 </head>
 
 <body>
+    <script>
+        function getCookie(name) {
+            const cookies = document.cookie.split('; ');
+            const cookie = cookies.find(row => row.startsWith(name + '='));
+            return cookie ? cookie.split('=')[1] : null; // Return the value or null if not found
+        }
+
+        const authToken = getCookie('authToken');
+        console.log('---authToken--', authToken); // Check the value in the console
+        if (authToken) {
+            // Redirect to dashboard if token exists
+            window.location.href = '/dashboard';
+        }
+    </script>
     <div class="login-container">
-        <%= console.log("----enterprise",enterprise) %>
-            <h1>Sign up</h1>
-            <form action="/api/signup" method="POST">
-                <div>
-                    <label for="name">Name:</label>
-                    <input type="text" id="name" name="name" required><br />
-                </div>
-                <div>
-                    <label for="email">Email:</label>
-                    <input type="email" id="email" name="email" required><br />
-                </div>
-                <div>
-                    <label for="password">Password:</label>
-                    <input type="password" id="password" name="password" required><br />
-                </div>
-                <div>
-                    <label for="role">Role:</label>
-                    <select id="role" name="role" required>
-                        <option value="">Select an Role</option>
-                        <% [0, 1, 2].forEach((role) => { %>
-                            <option value="<%= role %>">
-                                <%= role === 0 ? '0 (SuperAdmin)' : role === 1 ? '1 (Admin)' : '2 (User)' %>
-                            </option>
+        <!-- <%= console.log("----enterprise",enterprise) %> -->
+        <h1>Sign up</h1>
+        <form action="/api/signup" method="POST">
+            <div>
+                <label for="name">Name:</label>
+                <input type="text" id="name" name="name" required><br />
+            </div>
+            <div>
+                <label for="email">Email:</label>
+                <input type="email" id="email" name="email" required><br />
+            </div>
+            <div>
+                <label for="password">Password:</label>
+                <input type="password" id="password" name="password" required><br />
+            </div>
+            <div>
+                <label for="role">Role:</label>
+                <select id="role" name="role" required>
+                    <option value="">Select an Role</option>
+                    <% [0, 1, 2].forEach((role)=> { %>
+                        <option value="<%= role %>">
+                            <%= role===0 ? '0 (SuperAdmin)' : role===1 ? '1 (Admin)' : '2 (User)' %>
+                        </option>
                         <% }) %>
-                    </select>
-                </div>
+                </select>
+            </div>
 
-                <div>
-                    <label for="enterpriseId">Enterprise:</label>
-                    <select id="enterpriseId" name="enterpriseId" required>
-                        <option value="">Select an Enterprise</option>
-                        <% enterprise.map(e=> { %>
-                            <option value="<%= e.id %>">
-                                <%= e.name %>
-                            </option>
-                            <% }) %>
-                    </select>
-                </div>
+            <div>
+                <label for="enterpriseId">Enterprise:</label>
+                <select id="enterpriseId" name="enterpriseId" required>
+                    <option value="">Select an Enterprise</option>
+                    <% enterprise.map(e=> { %>
+                        <option value="<%= e.id %>">
+                            <%= e.name %>
+                        </option>
+                        <% }) %>
+                </select>
+            </div>
 
-                <button type="submit">Sign up</button>
-            </form>
-            <p>Already Have an Account ? <a href="/login">Login Here</a></p>
+            <button type="submit">Sign up</button>
+        </form>
+        <p>Already Have an Account ? <a href="/login">Login Here</a></p>
     </div>
 </body>
 

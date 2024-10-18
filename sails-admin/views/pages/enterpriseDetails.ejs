@@ -112,29 +112,35 @@
         </thead>
         <tbody>
           <% if (Array.isArray(user) && user.length) { %>
-            <% user.forEach(e => { %>
+            <% user.forEach(e=> { %>
               <tr>
-                <td><%= e.name %></td>
-                <td><%= e.email %></td>
-                <td><%= e.role %></td>
-                <td><%= e.enterpriseId %></td>
                 <td>
-                  <button class="editProfileBtn" data-id="<%= e.id %>" 
-                          data-name="<%= e.name %>" 
-                          data-email="<%= e.email %>" 
-                          data-role="<%= e.role %>" 
-                          data-enterpriseId="<%= e.enterpriseId %>">Update</button>
+                  <%= e.name %>
                 </td>
                 <td>
-                  <button>Remove</button>
+                  <%= e.email %>
+                </td>
+                <td>
+                  <%= e.role %>
+                </td>
+                <td>
+                  <%= e.enterpriseId %>
+                </td>
+                <td>
+                  <button class="editProfileBtn" data-id="<%= e.id %>" data-name="<%= e.name %>"
+                    data-email="<%= e.email %>" data-role="<%= e.role %>"
+                    data-enterpriseId="<%= e.enterpriseId %>">Update</button>
+                </td>
+                <td>
+                  <button class="removeUserBtn" onclick="removeUser('<%= e.id %>', '<%= e.enterpriseId %>')">Remove</button>
                 </td>
               </tr>
-            <% }) %>
-          <% } else { %>
-            <tr>
-              <td colspan="6">No users found.</td>
-            </tr>
-          <% } %>
+              <% }) %>
+                <% } else { %>
+                  <tr>
+                    <td colspan="6">No users found.</td>
+                  </tr>
+                  <% } %>
         </tbody>
       </table>
     </div>
@@ -209,7 +215,7 @@
     const editModal = document.getElementById("editModal");
     const closeEditModal = document.getElementById("closeEditModal");
 
-    editButtons.forEach(button => {
+    editButtons.map(button => {
       button.onclick = function () {
         const userId = button.getAttribute("data-id");
         const userName = button.getAttribute("data-name");
@@ -240,6 +246,29 @@
         editModal.style.display = "none";
       }
     };
+
+    async function removeUser(id, enterpriseId) {
+      // console.log("------id , eId",id,enterpriseId)
+      if (confirm('Are you sure you want to remove this user?')) {
+        try {
+          const response = await fetch(`/user/remove/${id}`, {
+            method: 'DELETE',
+            body: JSON.stringify({ id, enterpriseId,addedBy: 'superAdmin' }),
+          });
+
+        
+            alert('User removed successfully.');
+            window.location.reload(); // Reload page to reflect changes
+       
+        } catch (error) {
+          // console.error('Error:', error);
+          alert('An error occurred while removing the user.');
+        }
+      }
+    }
+
+
+
   </script>
 </body>
 
