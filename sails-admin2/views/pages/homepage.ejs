@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Conditional Navigation</title>
+    <style>
+      a {
+        text-decoration: none;
+      }
+      ul {
+        list-style: none;
+      }
+      .default-page {
+        background-color: rgb(252, 234, 195);
+      }
+      .default-page ul {
+        display: flex;
+        justify-content: center;
+        gap: 40px;
+      }
+      .default-page ul li a {
+        font-weight: bold;
+        font-size: 20px;
+      }
+      .home-page {
+        width: 100%;
+        display: flex;
+        justify-content: center;
+        margin-top: 30px;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="default-page">
+      <ul id="nav-links">
+        <!-- Links will be inserted here by JavaScript -->
+      </ul>
+    </div>
+    <div class="home-page">
+      <h1>Welcome</h1>
+    </div>
+
+   
+  </body>
+</html>

@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <title>New Sails App</title>
+
+  <!-- Viewport mobile tag for sensible mobile support -->
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+
+  <!-- Include your CSS -->
+  <link rel="stylesheet" href="/styles/layout.css">
+
+  <style>
+    /* Navbar styling */
+    .navbar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      background-color: #333;
+      padding: 15px;
+      position: relative;
+    }
+
+    .navbar ul {
+      list-style: none;
+      margin: 0;
+      padding: 0;
+      display: flex;
+      gap: 20px;
+    }
+
+    .navbar ul li {
+      display: inline;
+    }
+
+    .navbar ul li a {
+      color: white;
+      text-decoration: none;
+      font-size: 18px;
+      font-weight: bold;
+    }
+
+    .navbar ul li a:hover {
+      color: #007bff;
+    }
+
+    .logout-button {
+      width: 86px;
+      background-color: #d9534f;
+      border: none;
+      color: white;
+      padding: 10px 20px;
+      border-radius: 5px;
+      cursor: pointer;
+      font-size: 16px;
+      transition: background-color 0.3s;
+    }
+
+    .logout-button:hover {
+      background-color: #c9302c;
+    }
+
+    .content {
+      padding: 20px;
+    }
+  </style>
+</head>
+
+<body>
+  <header class="navbar">
+    <!-- Navigation Links -->
+    <ul id="nav-links"></ul>
+
+    <!-- Logout Button (hidden by default) -->
+    <button id="logoutButton" class="logout-button" style="display: none;">Logout</button>
+    <button id="loginButton" class="logout-button" onclick="window.location.href = '/login'"
+      style="display: none;">Login</button>
+  </header>
+
+  <!-- Content of the page -->
+  <div class="content">
+    <%- body %> <!-- This is where page-specific content will be injected -->
+  </div>
+
+  <script>
+    // Function to get cookie by name
+    function getCookie(name) {
+      const value = `; ${document.cookie}`;
+      const parts = value.split(`; ${name}=`);
+      if (parts.length === 2) return parts.pop().split(';').shift();
+      return null;
+    }
+
+    // Get the navigation element and logout button
+    const navLinks = document.getElementById('nav-links');
+    const logoutButton = document.getElementById('logoutButton');
+    const loginButton = document.getElementById('loginButton');
+
+    // Check for the authToken cookie
+    const userSession = getCookie('authToken');
+
+    async function getUser(token) {
+      console.log('---token',token)
+      try {
+        const response = await fetch(`/api/userToken/${token}`, {
+          method: 'GET',
+          headers: {
+            'Content-Type': 'application/json', // Set content type for JSON
+          },
+        });
+        const data = await response.json()
+        console.log('---data', data)
+        return data
+
+      } catch (error) {
+        // console.error('Error:', error);
+        alert('An error occurred while fetching the user.');
+      }
+    }
+    getUser(userSession)
+
+    // Dynamically update the navigation links and show/hide the logout button
+    if (userSession) {
+      // If cookie exists, show "Home", "Dashboard", and Logout button
+      navLinks.innerHTML = `
+        <li><a href="/">Home</a></li>
+        <li><a href="/dashboard">Dashboard</a></li>
+      `;
+      logoutButton.style.display = 'block';
+      loginButton.style.display = 'none';
+    } else {
+      // If cookie is missing, show only "Home" and hide the Logout button
+      navLinks.innerHTML = `
+        <li><a href="/">Home</a></li>
+      `;
+      logoutButton.style.display = 'none';
+      loginButton.style.display = 'block';
+    }
+
+    // Logout button event listener
+    logoutButton.addEventListener('click', function () {
+      // Clear the auth token from cookies and local storage
+      document.cookie = "authToken=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
+      localStorage.removeItem('authToken');
+
+      // Redirect to the login page
+      window.location.href = '/login';
+    });
+
+  </script>
+
+  <!--SCRIPTS-->
+  <script src="/dependencies/sails.io.js"></script>
+  <!--SCRIPTS END-->
+</body>
+
+</html>

@@ -1,0 +1,271 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Enterprise Details</title>
+    <style>
+   
+
+      table {
+        width: 80%;
+        border-collapse: collapse;
+        margin: 20px auto;
+        background-color: #fff;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+      }
+
+      th,
+      td {
+        padding: 12px;
+        text-align: center;
+        border-bottom: 1px solid #ddd;
+      }
+
+      th {
+        background-color: #4caf50;
+        color: white;
+        font-weight: bold;
+      }
+
+      tr:nth-child(even) {
+        background-color: #f2f2f2;
+      }
+
+      tr:hover {
+        background-color: #e0e0e0;
+      }
+
+      .logo {
+        max-width: 100px;
+        max-height: 50px;
+      }
+
+      /* Modal Styles */
+      .modal {
+        display: none; /* Hidden by default */
+        position: fixed;
+        z-index: 1;
+        padding-top: 60px; /* Location of the modal */
+        left: 0;
+        top: 0;
+        width: 100%;
+        height: 100%;
+        overflow: auto; /* Enable scroll if needed */
+        background-color: rgba(0, 0, 0, 0.5); /* Black w/ opacity */
+      }
+
+      .modal-content {
+        background-color: #fff;
+        margin: 5% auto; /* 15% from the top and centered */
+        padding: 20px;
+        border: 1px solid #888;
+        width: 80%; /* Could be more or less, depending on screen size */
+        max-width: 500px; /* Prevents the modal from getting too wide */
+        border-radius: 8px; /* Rounded corners */
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2); /* Shadow effect */
+      }
+
+      .close {
+        color: #aaa;
+        float: right;
+        font-size: 28px;
+        font-weight: bold;
+      }
+
+      .close:hover,
+      .close:focus {
+        color: black;
+        text-decoration: none;
+        cursor: pointer;
+      }
+
+      label {
+        font-weight: bold;
+        margin: 10px 0 5px;
+        display: block; /* Ensures labels stack above inputs */
+      }
+
+      input[type="text"],
+      input[type="email"],
+      input[type="number"] {
+        width: 100%; /* Full width */
+        padding: 10px; /* Add some padding */
+        margin: 5px 0 15px; /* Space out inputs */
+        border: 1px solid #ccc; /* Light grey border */
+        border-radius: 4px; /* Rounded corners */
+      }
+
+      button {
+        background-color: #28a745; /* Green background */
+        color: white; /* White text */
+        padding: 10px 15px; /* Space around the text */
+        border: none; /* No border */
+        border-radius: 4px; /* Rounded corners */
+        cursor: pointer; /* Pointer on hover */
+        font-size: 16px; /* Bigger font */
+      }
+
+      button:hover {
+        background-color: #218838; /* Darker green on hover */
+      }
+    </style>
+  </head>
+  <body>
+    <div>
+      <button onclick="window.location.href='/createEnterprise'">
+        Create Enterprise
+      </button>
+
+      <% if (enterprise.length === 0) { %>
+        <p>No Enterprises Found</p>
+      <% } else { %>
+        <table>
+          <thead>
+            <tr>
+              <th>Name</th>
+              <th>Logo</th>
+              <th>Employee Count</th>
+              <th>Manager Name</th>
+              <th>Manager Email</th>
+              <th>Manager Department</th>
+              <th>View</th>
+              <th>Update</th>
+              <th>Remove</th>
+            </tr>
+          </thead>
+          <tbody>
+            <% enterprise.forEach(e => { %>
+              <tr>
+                <td><%= e.name %></td>
+                <td><img src="<%= e.logo %>" alt="Logo" class="logo" /></td>
+                <td><%= e.employeeCount %></td>
+                <td><%= e.manager.name %></td>
+                <td><%= e.manager.email %></td>
+                <td><%= e.manager.department %></td>
+                <td>
+                  <button onclick="window.location.href='/enterpriselist/<%= e.id %>'">
+                    View
+                  </button>
+                </td>
+                <td>
+                  <button
+                    class="editProfileBtn"
+                    data-id="<%= e.id %>"
+                    data-name="<%= e.name %>"
+                    data-logo="<%= e.logo %>"
+                    data-email="<%= e.manager.email %>"
+                    data-enterpriseId="<%= e.enterpriseId %>"
+                    data-employeeCount="<%= e.employeeCount %>"
+                    data-managerDepartment="<%= e.manager.department %>"
+                  >
+                    Update
+                  </button>
+                </td>
+                <td>
+                  <button class="removeUserBtn" onclick="removeEnterprise('<%= e.id %>')">
+                    Remove
+                  </button>
+                </td>
+              </tr>
+            <% }) %>
+          </tbody>
+        </table>
+      <% } %>
+    </div>
+
+    <!-- Modal Structure -->
+    <div id="editModal" class="modal">
+      <div class="modal-content">
+        <span class="close" id="closeEditModal">&times;</span>
+        <h2>Edit Profile</h2>
+        <form id="editForm" method="POST">
+          <label for="editName">Name:</label>
+          <input type="text" id="editName" name="name" required />
+
+          <label for="editLogo">Logo URL:</label>
+          <input type="text" id="editLogo" name="logo" required />
+
+          <label for="editEmployeeCount">Employee Count:</label>
+          <input type="number" id="editEmployeeCount" name="employeeCount" required />
+
+          <label for="editManagerName">Manager Name:</label>
+          <input type="text" id="editManagerName" name="managerName" required />
+
+          <label for="editEmail">Manager Email:</label>
+          <input type="email" id="editEmail" name="email" required />
+
+          <label for="editManagerDepartment">Manager Department:</label>
+          <input type="text" id="editManagerDepartment" name="managerDepartment" required />
+
+          <input type="hidden" id="editEnterpriseId" name="enterpriseId" />
+          <button type="submit" class="button">Save Changes</button>
+        </form>
+      </div>
+    </div>
+
+    <script>
+      const editModal = document.getElementById("editModal");
+      const closeEditModalBtn = document.getElementById("closeEditModal");
+
+      document.addEventListener("click", function (event) {
+        if (event.target.classList.contains("editProfileBtn")) {
+          const button = event.target;
+          const userId = button.getAttribute("data-id");
+          const userName = button.getAttribute("data-name");
+          const userEmail = button.getAttribute("data-email");
+          const userLogo = button.getAttribute("data-logo");
+          const userEnterpriseId = button.getAttribute("data-enterpriseId");
+          const userEmployeeCount = button.getAttribute("data-employeeCount");
+          const userManagerDepartment = button.getAttribute("data-managerDepartment");
+
+          document.getElementById("editName").value = userName;
+          document.getElementById("editLogo").value = userLogo;
+          document.getElementById("editEmployeeCount").value = userEmployeeCount;
+          document.getElementById("editManagerName").value = userName;
+          document.getElementById("editEmail").value = userEmail;
+          document.getElementById("editManagerDepartment").value = userManagerDepartment;
+          document.getElementById("editEnterpriseId").value = userEnterpriseId;
+
+          const editForm = document.getElementById("editForm");
+          editForm.action = `/enterprise/update/${userId}`;
+
+          editModal.style.display = "block";
+        }
+      });
+
+      closeEditModalBtn.onclick = function () {
+        editModal.style.display = "none";
+      };
+
+      window.onclick = function (event) {
+        if (event.target === editModal) {
+          editModal.style.display = "none";
+        }
+      };
+
+      async function removeEnterprise(id) {
+        if (confirm("Are you sure you want to remove this enterprise?")) {
+          try {
+            const response = await fetch(`/enterprise/remove/${id}`, {
+              method: "DELETE",
+              headers: {
+                "Content-Type": "application/json",
+              },
+              body: JSON.stringify({ role: 99 }),
+            });
+
+            if (response.ok) {
+              alert("Enterprise removed successfully.");
+              window.location.reload();
+            } else {
+              alert("Failed to remove the enterprise.");
+            }
+          } catch (error) {
+            alert("An error occurred while removing the enterprise.");
+          }
+        }
+      }
+    </script>
+  </body>
+</html>

@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <link href="" rel="stylesheet" />
+  <title></title>
+  <style>
+    ul {
+      list-style: none;
+      display: flex;
+      justify-content: center;
+      gap: 40px;
+    }
+
+    a {
+      text-decoration: none;
+      font-weight: bold;
+      font-size: 20px;
+    }
+  </style>
+</head>
+
+<body>
+  <!-- <script>
+    function getCookie(name) {
+        const cookies = document.cookie.split('; ');
+        const cookie = cookies.find(row => row.startsWith(name + '='));
+        return cookie ? cookie.split('=')[1] : null; // Return the value or null if not found
+    }
+
+    const authToken = getCookie('authToken');
+    console.log('---authToken--', authToken); // Check the value in the console
+    if (authToken) {
+        // Redirect to dashboard if token exists
+        window.location.href = '/dashboard';
+    }
+</script> -->
+  <h1>Dashboard</h1>
+
+
+    <% if(user.role===0){ %>
+      <ul>
+        <li><a href="/userprofile/<%= user.id %>">User Profile</a></li>
+        <li><a href="/adminenterprise/<%= user.enterpriseId %>">Enterprise</a></li>
+        <li><a href="/enterpriselist">Enterprise List</a></li>
+
+      </ul>
+
+      <% }else if(user.role===1){ %>
+        <ul>
+          <li><a href="/userprofile/<%= user.id %>">User Profile</a></li>
+          <li><a href="/adminenterprise/<%= user.enterpriseId %>">Enterprise</a></li>
+    
+      <% }else{ %>
+          <ul>
+            <li><a href="/userprofile/<%= user.id %>">User Profile</a></li>
+          </ul>
+      <% } %>
+</body>
+
+</html>

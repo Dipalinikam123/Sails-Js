@@ -1,0 +1,333 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Admin Enterprise</title>
+  <style>
+  
+
+    h1 {
+      color: #333;
+      text-align: center;
+      margin-bottom: 20px;
+    }
+
+    h2 {
+      color: #555;
+      margin-top: 20px;
+    }
+
+   .ul-container {
+      list-style-type: none;
+      padding: 0;
+    }
+
+    .ul-container li {
+      background: #fff;
+      margin: 10px 0;
+      padding: 10px;
+      border-radius: 5px;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    }
+
+    strong {
+      color: #222;
+    }
+
+    a {
+      color: #007BFF;
+      text-decoration: none;
+    }
+
+    a:hover {
+      text-decoration: underline;
+    }
+
+    .logo {
+      max-width: 100px;
+      max-height: 100px;
+      display: block;
+      margin: 10px 0;
+    }
+
+    table {
+      width: 80%;
+      border-collapse: collapse;
+      margin: 20px auto;
+      background-color: #fff;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    }
+
+    th,
+    td {
+      padding: 12px;
+      text-align: center;
+      border-bottom: 1px solid #ddd;
+    }
+
+    th {
+      background-color: #4CAF50;
+      color: white;
+    }
+
+    tr:nth-child(even) {
+      background-color: #f2f2f2;
+    }
+
+    tr:hover {
+      background-color: #e0e0e0;
+    }
+
+    .button {
+      display: inline-block;
+      padding: 10px 15px;
+      background-color: #007BFF;
+      color: white;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+
+    .button:hover {
+      background-color: #0056b3;
+    }
+
+    /* Modal Styling */
+    .modal {
+      display: none;
+      position: fixed;
+      z-index: 1;
+      left: 0;
+      top: 0;
+      width: 100%;
+      height: 100%;
+      overflow: auto;
+      background-color: rgba(0, 0, 0, 0.4);
+    }
+
+    .modal-content {
+      background-color: #fefefe;
+      margin: 15% auto;
+      padding: 20px;
+      border: 1px solid #888;
+      width: 30%;
+      border-radius: 8px;
+    }
+
+    .close {
+      color: #aaa;
+      float: right;
+      font-size: 28px;
+      font-weight: bold;
+    }
+
+    .close:hover,
+    .close:focus {
+      color: black;
+      text-decoration: none;
+      cursor: pointer;
+    }
+  </style>
+</head>
+
+<body>
+  <h1>Admin Enterprise</h1>
+
+  <h2>Enterprise Details</h2>
+  <ul class="ul-container">
+    <li><strong>ID:</strong>
+      <%= enterprise.id %>
+    </li>
+    <li><strong>Name:</strong>
+      <%= enterprise.name %>
+    </li>
+    <li><strong>Logo:</strong>
+      <a href="<%= enterprise.logo %>" target="_blank">
+        <img class="logo" src="<%= enterprise.logo %>" alt="Logo" />
+      </a>
+    </li>
+    <li><strong>Employee Count:</strong>
+      <%= enterprise.employeeCount %>
+    </li>
+    <li><strong>Manager:</strong>
+      <ul>
+        <li><strong>Name:</strong>
+          <%= enterprise.manager.name %>
+        </li>
+        <li><strong>Email:</strong>
+          <%= enterprise.manager.email %>
+        </li>
+        <li><strong>Department:</strong>
+          <%= enterprise.manager.department %>
+        </li>
+      </ul>
+    </li>
+  </ul>
+
+  <!-- Add Users Button -->
+  <button id="addUserBtn" class="button">Add Users</button>
+
+  <!-- Users Table -->
+  <table id="usersTable">
+    <thead>
+      <tr>
+        <th>ID</th>
+        <th>Name</th>
+        <th>Email</th>
+        <th>Role</th>
+        <th>Enterprise ID</th>
+        <th>Update</th>
+        <th>Remove</th>
+      </tr>
+    </thead>
+    <tbody>
+      <% user.map(user=> { %>
+        <tr>
+          <td>
+            <%= user.id %>
+          </td>
+          <td>
+            <%= user.name %>
+          </td>
+          <td>
+            <%= user.email %>
+          </td>
+          <td>
+            <%= user.role %>
+          </td>
+          <td>
+            <%= user.enterpriseId %>
+          </td>
+          <td>
+            <button class="editProfileBtn" data-id="<%= user.id %>" data-name="<%= user.name %>"
+              data-email="<%= user.email %>" data-role="<%= user.role %>"
+              data-enterpriseId="<%= user.enterpriseId %>">Update</button>
+          </td>
+          <td> <button class="removeUserBtn"
+              onclick="removeUser('<%= user.id %>', '<%= user.enterpriseId %>')">Remove</button></td>
+        </tr>
+        <% }); %>
+    </tbody>
+  </table>
+
+  <!-- Modal for Adding Users -->
+  <div id="userModal" class="modal">
+    <div class="modal-content">
+      <span class="close">&times;</span>
+      <h2>Add User</h2>
+      <form action="/api/signup" method="POST">
+        <label for="name">Name:</label>
+        <input type="text" id="name" name="name" required><br><br>
+        <label for="email">Email:</label>
+        <input type="email" id="email" name="email" required><br><br>
+        <label for="role">Role:</label>
+        <input type="text" id="role" name="role" required><br><br>
+        <label for="password">Password:</label>
+        <input type="password" id="password" name="password" required><br><br>
+        <input type="hidden" id="enterpriseId" name="enterpriseId" value="<%= enterprise.id %>" readonly
+          required><br><br>
+        <input type="hidden" id="addedBy" name="addedBy" value="admin">
+        <button type="submit">Submit</button>
+      </form>
+    </div>
+  </div>
+
+  <!-- edit user model -->
+  <div id="editModal" class="modal">
+    <div class="modal-content">
+      <span class="close" id="closeEditModal">&times;</span>
+      <h2>Edit Profile</h2>
+      <form id="editForm" method="POST">
+        <label for="editName">Name:</label>
+        <input type="text" id="editName" name="name" required>
+
+        <label for="editEmail">Email:</label>
+        <input type="email" id="editEmail" name="email" required>
+
+        <label for="editRole">Role:</label>
+        <input type="text" id="editRole" name="role" required>
+
+        <!-- <label for="editEnterpriseId">Enterprise ID:</label> -->
+        <input type="hidden" id="editEnterpriseId" name="enterpriseId" value="<%=enterprise.enterpriseId %>" required>
+        <input type="hidden" id="addedBy" name="addedBy" value="admin">
+        <button type="submit" class="button" style="background-color: #28a745;">Save Changes</button>
+      </form>
+    </div>
+  </div>
+
+  <!-- JavaScript for Modal -->
+  <script>
+    const modal = document.getElementById("userModal");
+    const btn = document.getElementById("addUserBtn");
+    const closeButtons = document.getElementsByClassName("close");
+
+    btn.onclick = function () {
+      modal.style.display = "block";
+    };
+
+    for (let closeButton of closeButtons) {
+      closeButton.onclick = function () {
+        modal.style.display = "none";
+        editModal.style.display = "none"; // Ensure edit modal also closes
+      };
+    }
+
+    window.onclick = function (event) {
+      if (event.target == modal || event.target == editModal) {
+        modal.style.display = "none";
+        editModal.style.display = "none";
+      }
+    };
+
+    // Open edit modal for user
+    document.addEventListener('click', function (event) {
+      if (event.target.classList.contains("editProfileBtn")) {
+        const button = event.target;
+        const userId = button.getAttribute("data-id");
+        const userName = button.getAttribute("data-name");
+        const userEmail = button.getAttribute("data-email");
+        const userRole = button.getAttribute("data-role");
+        const userEnterpriseId = button.getAttribute("data-enterpriseId");
+
+        // Populate the edit modal with user data
+        document.getElementById("editName").value = userName;
+        document.getElementById("editEmail").value = userEmail;
+        document.getElementById("editRole").value = userRole;
+        document.getElementById("editEnterpriseId").value = userEnterpriseId;
+
+        // Set the form action to the update endpoint
+        const editForm = document.getElementById("editForm");
+        editForm.action = `/api/user/${userId}`;
+
+        editModal.style.display = "block";
+      }
+    });
+
+    async function removeUser(id, enterpriseId) {
+      // console.log("------id , eId", id, enterpriseId);
+      if (confirm('Are you sure you want to remove this user?')) {
+        try {
+          const response = await fetch(`/user/remove/${id}`, {
+            method: 'DELETE',
+            headers: {
+              'Content-Type': 'application/json', // Set content type for JSON
+            },
+            body: JSON.stringify({ id, enterpriseId, addedBy: 'admin' }),
+          });
+
+          alert('User removed successfully.');
+          window.location.reload(); // Reload page to reflect changes
+        } catch (error) {
+          console.error('Error:', error);
+          alert('An error occurred while removing the user.');
+        }
+      }
+    }
+  </script>
+
+
+</body>
+
+</html>
