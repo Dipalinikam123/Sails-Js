@@ -9,32 +9,31 @@ module.exports = {
   schema: true,
   attributes: {
     name: {
-      type: "string",
+      type: 'string',
       required: true,
     },
     logo: {
-      type: "string",
+      type: 'string',
     },
     employeeCount: {
-      type: "number",
-      required: true,
+      type: 'number',
     },
     manager: {
-      type: "json", // Use JSON to store all manager details
+      type: 'json', // Use JSON to store all manager details
       required: true,
       custom: function (value) {
         // Optional: Validate the structure of the manager object
         return (
-          typeof value === "object" &&
+          typeof value === 'object' &&
           value !== null &&
-          typeof value.name === "string" &&
-          typeof value.email === "string" &&
-          typeof value.department === "string"
+          typeof value.name === 'string' &&
+          typeof value.email === 'string' &&
+          typeof value.department === 'string'
         );
       },
     },
     role: {
-      type: "number",
+      type: 'number',
     },
   },
 };

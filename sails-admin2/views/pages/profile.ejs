@@ -84,7 +84,7 @@
 
   <body>
     <div class="profile-container" id="profileContainer" style="display: none">
-      <h1>User Profile</h1>
+      <h1>Profile</h1>
       <div id="profile-info">
         <p>
           <strong>Name:</strong> <span id="userName"> <%= user.name %> </span>
@@ -94,7 +94,7 @@
           <span id="userEmail"> <%= user.email %> </span>
         </p>
         <p>
-          <strong>Role:</strong> <span id="userRole"> <%= user.role %> </span>
+          <strong>Role:</strong> <span id="userRole"> <%= user.role===0 ? 'SuperAdmin' : user.role===1 ? 'Admin' :'User' %> </span>
         </p>
         <p>
           <strong>Enterprise ID:</strong>
@@ -126,15 +126,6 @@
             name="email"
             value="<%= user.email %>"
           />
-
-          <label for="editRole">Role:</label>
-          <input
-            type="text"
-            id="editRole"
-            name="role"
-            value="<%= user.role %>"
-          />
-
           <label for="editEnterpriseId">Enterprise ID:</label>
           <input
             type="text"

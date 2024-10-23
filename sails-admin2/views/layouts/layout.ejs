@@ -68,10 +68,10 @@
 
 <body>
   <header class="navbar">
-    <!-- Navigation Links -->
+   
     <ul id="nav-links"></ul>
 
-    <!-- Logout Button (hidden by default) -->
+   
     <button id="logoutButton" class="logout-button" style="display: none;">Logout</button>
     <button id="loginButton" class="logout-button" onclick="window.location.href = '/login'"
       style="display: none;">Login</button>
@@ -83,7 +83,6 @@
   </div>
 
   <script>
-    // Function to get cookie by name
     function getCookie(name) {
       const value = `; ${document.cookie}`;
       const parts = value.split(`; ${name}=`);
@@ -91,59 +90,82 @@
       return null;
     }
 
-    // Get the navigation element and logout button
+
     const navLinks = document.getElementById('nav-links');
     const logoutButton = document.getElementById('logoutButton');
     const loginButton = document.getElementById('loginButton');
 
-    // Check for the authToken cookie
+
     const userSession = getCookie('authToken');
 
+
     async function getUser(token) {
-      console.log('---token',token)
+      console.log('---token', token);
       try {
-        const response = await fetch(`/api/userToken/${token}`, {
+        const response = await fetch(`/api/userToken`, {
           method: 'GET',
           headers: {
-            'Content-Type': 'application/json', // Set content type for JSON
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`
           },
         });
-        const data = await response.json()
-        console.log('---data', data)
-        return data
 
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`);
+        }
+
+        const data = await response.json();
+        console.log('---data', data);
+        return data;
       } catch (error) {
-        // console.error('Error:', error);
+        console.error('Error fetching the user:', error);
         alert('An error occurred while fetching the user.');
       }
     }
-    getUser(userSession)
 
-    // Dynamically update the navigation links and show/hide the logout button
-    if (userSession) {
-      // If cookie exists, show "Home", "Dashboard", and Logout button
-      navLinks.innerHTML = `
-        <li><a href="/">Home</a></li>
-        <li><a href="/dashboard">Dashboard</a></li>
-      `;
-      logoutButton.style.display = 'block';
-      loginButton.style.display = 'none';
-    } else {
-      // If cookie is missing, show only "Home" and hide the Logout button
-      navLinks.innerHTML = `
-        <li><a href="/">Home</a></li>
-      `;
-      logoutButton.style.display = 'none';
-      loginButton.style.display = 'block';
+    async function updateUI() {
+      if (userSession) {
+        let user = await getUser(userSession);
+        console.log('------user--', user.user.role);
+        if (user.user.role === 0) {
+          navLinks.innerHTML = `
+            <li><a href="/">Home</a></li>
+            <li><a href="/adminenterprise/${user.user.enterpriseId}">Enterprise</a></li>
+            <li><a href="/enterpriselist">Enterprise List</a></li>
+            <li><a href="/userprofile/${user.user.id}"> Profile</a></li>
+          `;
+          logoutButton.style.display = 'block';
+          loginButton.style.display = 'none';
+        }
+        else if (user.user.role === 1) {
+          navLinks.innerHTML = `
+           <li><a href="/">Home</a></li>
+           <li><a href="/adminenterprise/${user.user.enterpriseId}">Enterprise</a></li>
+           <li><a href="/userprofile/${user.user.id}"> Profile</a></li>
+          `;
+          logoutButton.style.display = 'block';
+          loginButton.style.display = 'none';
+        }
+        else {
+          navLinks.innerHTML = `
+           <li><a href="/">Home</a></li>
+           <li><a href="/userprofile/${user.user.id}">Profile</a></li>
+          `;
+          logoutButton.style.display = 'block';
+          loginButton.style.display = 'none';
+        }
+      } else {
+        logoutButton.style.display = 'none';
+        loginButton.style.display = 'none';
+      }
     }
 
-    // Logout button event listener
+    updateUI();
+
+
     logoutButton.addEventListener('click', function () {
-      // Clear the auth token from cookies and local storage
       document.cookie = "authToken=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
       localStorage.removeItem('authToken');
-
-      // Redirect to the login page
       window.location.href = '/login';
     });
 

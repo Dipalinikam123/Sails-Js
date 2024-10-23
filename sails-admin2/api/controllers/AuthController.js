@@ -5,15 +5,22 @@ const secretKey = process.env.SECRET_KEY; // Replace with your actual secret key
 
 module.exports = {
   signup: async function (req, res) {
-    // console.log('req-----', req.session);
     try {
+      console.log('req-----', req.body.role);
       const { name, email, password, role, enterpriseId } = req.body;
 
       // Check if all required fields are present
-      if (!name || !email || !password || !enterpriseId) {
+      if (!name || !email || !password || !enterpriseId || !role) {
         return res.status(400).json({ success: false, message: 'Fields are require...' });
       }
-      const existingUser = await User.findOne({ email, role: 0 });
+
+      const existingSuperAdmin = await User.findOne({ role: 0 });
+      if (existingSuperAdmin) {
+        return res.status(400).json({ success: false, message: 'Only one user can have the SuperAdmin role.' });
+      }
+
+
+      const existingUser = await User.findOne({ email });
       if (existingUser) {
         return res.status(400).json({ success: false, message: 'Email already in use' });
       }
@@ -39,7 +46,7 @@ module.exports = {
       req.body.addedBy === 'admin' && res.redirect(`/adminenterprise/${newUser.enterpriseId}`);
 
       // return res.view('pages/dashboard', { token: token, user: newUser });
-      return res.redirect('/dashboard');
+      return res.redirect('/');
 
     } catch (error) {
       console.log(error);
@@ -61,11 +68,6 @@ module.exports = {
     // const checkToken = req.body.token;
     // console.log('-----signin token --',checkToken)
     try {
-
-      // if (checkToken) {
-      //   return res.redirect('/dashboard');
-      // };
-
       const user = await User.findOne({ email: req.body.email });
       if (!user) {
         return res.status(401).json({ message: USER_NOT_FOUND });
@@ -81,10 +83,7 @@ module.exports = {
       // req.session.token = token;
       res.cookie('authToken', token, { httpOnly: false, secure: true });
       await User.updateOne({ id: user.id }).set({ token });
-      // console.log('session----', req.session);
-      // return res.status(200).json({ message: 'login successfull', token });
-      // return res.view('pages/dashboard', { token: token, user: user });
-      return res.redirect('/dashboard');
+      return res.redirect('/');
     } catch (error) {
       // console.error('Signin error:', error);
       return res.status(500).json({ message: 'login fail', error });

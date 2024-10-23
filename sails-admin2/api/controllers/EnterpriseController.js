@@ -2,10 +2,10 @@
 module.exports = {
   createEnterprise: async function (req, res) {
     try {
-      const { name, logo, employeeCount, manager } = req.body;
+      const { name, logo, manager } = req.body;
 
       // Validate required fields
-      if (!name || !employeeCount || !manager) {
+      if (!name || !manager) {
         return res
           .status(400)
           .json({ success: false, message: 'All fields are required.' });
@@ -15,7 +15,6 @@ module.exports = {
       const newEnterprise = await Enterprise.create({
         name,
         logo,
-        employeeCount,
         manager,
       }).fetch();
 
@@ -41,38 +40,69 @@ module.exports = {
   },
   getAdminEnterprise: async function (req, res) {
     const enterpriseId = req.params.id;
-    // console.log('-----', enterpriseId);
     try {
       const enterprise = await Enterprise.findOne({ id: enterpriseId });
-      const user = await User.find({ enterpriseId, role: { '!=': 99 } });
+
       if (!enterprise) {
         return res.status(404).json({ message: 'Enterprise not found' });
       }
+
+      const employeeCount = await User.count({ enterpriseId });
+
+      const users = await User.find({ enterpriseId, role: { '!=': 99 } });
+
+      enterprise.employeeCount = employeeCount;
+
+
       return res.view('pages/adminEnterprise', {
         enterprise: enterprise,
-        user: user,
+        user: users,
       });
     } catch (error) {
       console.error('Failed to retrieve enterprise:', error);
-      return res
-        .status(500)
-        .json({ message: 'Failed to retrieve enterprise', error });
+      return res.status(500).json({ message: 'Failed to retrieve enterprise', error });
     }
   },
+
+  // getAdminEnterprise: async function (req, res) {
+  //   const enterpriseId = req.params.id;
+  //   // console.log('-----', enterpriseId);
+  //   try {
+  //     const enterprise = await Enterprise.findOne({ id: enterpriseId });
+  //     enterprise.employeeCount= User.count({enterpriseId});
+  //     let user = await User.find({ enterpriseId, role: { '!=': 99 } });
+  //     if (!enterprise) {
+  //       return res.status(404).json({ message: 'Enterprise not found' });
+  //     }
+  //     return res.view('pages/adminEnterprise', {
+  //       enterprise: enterprise,
+  //       user: user,
+  //     });
+  //   } catch (error) {
+  //     console.error('Failed to retrieve enterprise:', error);
+  //     return res
+  //       .status(500)
+  //       .json({ message: 'Failed to retrieve enterprise', error });
+  //   }
+  // },
   getEnterpriseList: async function (req, res) {
     try {
-      // Fetch all Interprice from the database
-      const enterprise = await Enterprise.find({role: { '!=': 99 }});
+      let enterprises = await Enterprise.find({ role: { '!=': 99 } });
+
+      enterprises = await Promise.all(enterprises.map(async (e) => {
+        const count = await User.count({ enterpriseId: e.id });
+        e.employeeCount = count;
+        return e;
+      }));
+
       return res.view('pages/enterpriseList', {
-        enterprise: enterprise,
+        enterprise: enterprises,
       });
     } catch (error) {
-      // console.error('Failed to retrieve Interprice:', error);
-      return res
-        .status(500)
-        .json({ message: 'fail to retrive interprise', error });
+      return res.status(500).json({ message: 'Failed to retrieve enterprises', error });
     }
   },
+
   getEnterpriseDetail: async function (req, res) {
     const enterpriseId = req.params.id;
     // console.log('----Enterprise ID detail:', enterpriseId);

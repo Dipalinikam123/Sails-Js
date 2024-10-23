@@ -6,14 +6,13 @@
     <title>Create Enterprise</title>
     <link rel="stylesheet" href="/styles.css"> <!-- Link to your stylesheet -->
     <style>
-     
-
         .form-container {
             background-color: #fff;
             padding: 20px;
             box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
             border-radius: 5px;
             width: 400px;
+            margin: 20px auto;
         }
 
         h1 {
@@ -28,7 +27,7 @@
         input {
             width: 100%;
             padding: 8px;
-            margin-bottom: 10px;
+            margin-bottom: 5px;
             border: 1px solid #ddd;
             border-radius: 4px;
         }
@@ -46,33 +45,98 @@
         button:hover {
             background-color: #45a049;
         }
+
+        .error {
+            color: red;
+            font-size: 12px;
+            /* margin-top: -10px; */
+            margin-bottom: 15px;
+        }
     </style>
 </head>
 <body>
     <div class="form-container">
         <h1>Create Enterprise</h1>
-        <form action="/api/enterprise" method="POST">
+        <form id="enterpriseForm" action="/api/enterprise" method="POST" onsubmit="return validateForm()">
             <label for="name">Enterprise Name:</label>
-            <input type="text" id="name" name="name" required>
+            <input type="text" id="name" name="name" >
+            <span id="nameError" class="error"></span>
 
             <label for="logo">Logo URL:</label>
             <input type="text" id="logo" name="logo">
-
-            <label for="employeeCount">Employee Count:</label>
-            <input type="number" id="employeeCount" name="employeeCount" required>
+            <span id="logoError" class="error"></span>
 
             <h2>Manager Details</h2>
             <label for="managerName">Manager Name:</label>
-            <input type="text" id="managerName" name="manager[name]" required>
+            <input type="text" id="managerName" name="manager[name]" >
+            <span id="managerNameError" class="error"></span>
 
             <label for="managerEmail">Manager Email:</label>
-            <input type="email" id="managerEmail" name="manager[email]" required>
+            <input type="email" id="managerEmail" name="manager[email]" >
+            <span id="managerEmailError" class="error"></span>
 
             <label for="managerDepartment">Manager Department:</label>
-            <input type="text" id="managerDepartment" name="manager[department]" required>
+            <input type="text" id="managerDepartment" name="manager[department]" >
+            <span id="managerDepartmentError" class="error"></span>
 
             <button type="submit">Create Enterprise</button>
         </form>
     </div>
+
+    <script>
+        function validateForm() {
+            let valid = true;
+
+            // Clear previous error messages
+            document.querySelectorAll('.error').forEach(el => el.textContent = '');
+
+            // Enterprise Name validation
+            const name = document.getElementById('name');
+            if (name.value.trim() === '') {
+                document.getElementById('nameError').textContent = 'Enterprise name is required.';
+                valid = false;
+            }
+
+            // Logo URL validation (optional, but must be a valid URL if provided)
+            const logo = document.getElementById('logo');
+            if (logo.value.trim() !== '' && !isValidURL(logo.value)) {
+                document.getElementById('logoError').textContent = 'Please enter a valid URL for the logo.';
+                valid = false;
+            }
+
+            // Manager Name validation
+            const managerName = document.getElementById('managerName');
+            if (managerName.value.trim() === '') {
+                document.getElementById('managerNameError').textContent = 'Manager name is required.';
+                valid = false;
+            }
+
+            // Manager Email validation
+            const managerEmail = document.getElementById('managerEmail');
+            if (managerEmail.value.trim() === '') {
+                document.getElementById('managerEmailError').textContent = 'Manager email is required.';
+                valid = false;
+            } else if (!isValidEmail(managerEmail.value)) {
+                document.getElementById('managerEmailError').textContent = 'Please enter a valid email address.';
+                valid = false;
+            }
+
+            // Manager Department validation
+            const managerDepartment = document.getElementById('managerDepartment');
+            if (managerDepartment.value.trim() === '') {
+                document.getElementById('managerDepartmentError').textContent = 'Manager department is required.';
+                valid = false;
+            }
+
+            return valid;
+        }
+
+        // Helper function to validate email format
+        function isValidEmail(email) {
+            const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            return emailPattern.test(email);
+        }
+
+    </script>
 </body>
 </html>
