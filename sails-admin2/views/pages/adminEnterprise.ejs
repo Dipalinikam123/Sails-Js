@@ -177,9 +177,9 @@
 
   <h2>Enterprise Details</h2>
   <ul class="ul-container">
-    <li><strong>ID:</strong>
+    <!-- <li><strong>ID:</strong>
       <%= enterprise.id %>
-    </li>
+    </li> -->
     <li><strong>Name:</strong>
       <%= enterprise.name %>
     </li>
@@ -213,11 +213,11 @@
   <table id="usersTable">
     <thead>
       <tr>
-        <th>ID</th>
+        <!-- <th>ID</th> -->
         <th>Name</th>
         <th>Email</th>
         <th>Role</th>
-        <th>Enterprise ID</th>
+        <!-- <th>Enterprise ID</th> -->
         <th>Edit</th>
         <th>Remove</th>
       </tr>
@@ -225,9 +225,9 @@
     <tbody>
       <% user.map(user=> { %>
         <tr>
-          <td>
+          <!-- <td>
             <%= user.id %>
-          </td>
+          </td> -->
           <td>
             <%= user.name %>
           </td>
@@ -237,13 +237,12 @@
           <td>
             <%= user.role===0 ? 'SuperAdmin' : user.role===1 ? 'Admin' :'User' %>
           </td>
-          <td>
+          <!-- <td>
             <%= user.enterpriseId %>
-          </td>
+          </td> -->
           <td>
             <button class="editProfileBtn submit-btn" data-id="<%= user.id %>" data-name="<%= user.name %>"
-              data-email="<%= user.email %>"
-              data-role="<%= user.role===0 ? 'SuperAdmin':user.role===1 ? 'Admin' :'User' %>"
+              data-email="<%= user.email %>" data-role="<%= user.role %>"
               data-enterpriseId="<%= user.enterpriseId %>">Edit</button>
           </td>
           <td> <button class="removeUserBtn submit-btn"
@@ -265,19 +264,20 @@
         <label for="email">Email:</label>
         <input type="text" id="email" name="email"><br>
         <span id="emailError" class="error"></span>
-        <label for="role">Role:</label>
-        <select id="role" name="role">
-          <option value="">Select an Role</option>
-          <% [0, 1, 2].map((role)=> { %>
-            <option value="<%= role %>">
-              <%= role===0 ? 'SuperAdmin' : role===1 ? 'Admin' : 'User' %>
-            </option>
-            <% }) %>
-        </select><br>
-        <span id="roleError" class="error"></span>
         <label for="password">Password:</label>
         <input type="password" id="password" name="password"><br>
         <span id="passwordError" class="error"></span>
+        <label for="role">Role:</label>
+        <select id="role" name="role">
+          <option value="">Select a Role</option>
+          <% [ 1, 2].map((role)=> { %>
+            <option value="<%= role %>">
+              <%= role===1 ? 'Admin' : 'User' %>
+            </option>
+            <% }) %>
+        </select><br>
+
+        <span id="roleError" class="error"></span>
         <input type="hidden" id="enterpriseId" name="enterpriseId" value="<%= enterprise.id %>" readonly
           required><br><br>
         <input type="hidden" id="addedBy" name="addedBy" value="admin">
@@ -301,8 +301,15 @@
         <span id="emailError2" class="error"></span>
 
         <label for="editRole">Role:</label>
-        <input type="text" id="editRole" name="role">
-        <span id="roleError2" class="error"></span>
+        <!-- <input type="text" id="editRole" name="role"> -->
+        <select id="editRole" name="role">
+          <% [0, 1, 2].map((role)=> { %>
+            <option value="<%= role %>">
+              <%= role===0? 'SuperAdmin': role===1 ? 'Admin' : 'User' %>
+            </option>
+            <% }) %>
+        </select><br>
+        <span id="roleError2" class="error"></span><br>
 
         <!-- <label for="editEnterpriseId">Enterprise ID:</label> -->
         <input type="hidden" id="editEnterpriseId" name="enterpriseId" value="<%=enterprise.enterpriseId %>" required>
@@ -319,6 +326,10 @@
     const closeButtons = document.getElementsByClassName("close");
 
     btn.onclick = function () {
+      document.getElementById('name').value = '';
+      document.getElementById('email').value = '';
+      document.getElementById('password').value = '';
+      document.getElementById('role').value = '';
       modal.style.display = "block";
     };
 
@@ -372,7 +383,7 @@
       // Validate role selection
       if (edtRoleInput.value === "") {
         valid = false;
-        document.getElementById('roleError').textContent = 'Role is required.';
+        document.getElementById('roleError2').textContent = 'Role is required.';
       }
 
       // Prevent form submission if validation fails

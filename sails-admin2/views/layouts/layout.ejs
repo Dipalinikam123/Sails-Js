@@ -8,7 +8,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
 
   <!-- Include your CSS -->
-  <link rel="stylesheet" href="/styles/layout.css">
+  <!-- <link rel="stylesheet" href="/styles/layout.css"> -->
 
   <style>
     /* Navbar styling */
@@ -68,10 +68,10 @@
 
 <body>
   <header class="navbar">
-   
+
     <ul id="nav-links"></ul>
 
-   
+
     <button id="logoutButton" class="logout-button" style="display: none;">Logout</button>
     <button id="loginButton" class="logout-button" onclick="window.location.href = '/login'"
       style="display: none;">Login</button>
@@ -157,6 +157,9 @@
       } else {
         logoutButton.style.display = 'none';
         loginButton.style.display = 'none';
+        if (window.location.pathname !== '/login') {
+          window.location.href = '/login';  
+        }
       }
     }
 
@@ -166,7 +169,7 @@
     logoutButton.addEventListener('click', function () {
       document.cookie = "authToken=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
       localStorage.removeItem('authToken');
-      window.location.href = '/login';
+      window.location.href = '/';
     });
 
   </script>

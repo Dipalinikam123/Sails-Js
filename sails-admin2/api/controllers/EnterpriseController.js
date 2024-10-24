@@ -3,9 +3,10 @@ module.exports = {
   createEnterprise: async function (req, res) {
     try {
       const { name, logo, manager } = req.body;
+      console.log('---manager',manager);
 
       // Validate required fields
-      if (!name || !manager) {
+      if (!name || !manager || !logo) {
         return res
           .status(400)
           .json({ success: false, message: 'All fields are required.' });
@@ -18,7 +19,6 @@ module.exports = {
         manager,
       }).fetch();
 
-      // Respond with the created record
       // return res.status(201).json({ success: true, data: newEnterprise });
       return res.redirect('/enterpriselist');
     } catch (error) {
@@ -47,11 +47,12 @@ module.exports = {
         return res.status(404).json({ message: 'Enterprise not found' });
       }
 
-      const employeeCount = await User.count({ enterpriseId });
+      const employeeCount = await User.count({ enterpriseId: enterpriseId, role: { '!=': 99 } });
 
       const users = await User.find({ enterpriseId, role: { '!=': 99 } });
 
       enterprise.employeeCount = employeeCount;
+      await Enterprise.updateOne({ id: enterpriseId }).set({ employeeCount: employeeCount });
 
 
       return res.view('pages/adminEnterprise', {
@@ -64,33 +65,13 @@ module.exports = {
     }
   },
 
-  // getAdminEnterprise: async function (req, res) {
-  //   const enterpriseId = req.params.id;
-  //   // console.log('-----', enterpriseId);
-  //   try {
-  //     const enterprise = await Enterprise.findOne({ id: enterpriseId });
-  //     enterprise.employeeCount= User.count({enterpriseId});
-  //     let user = await User.find({ enterpriseId, role: { '!=': 99 } });
-  //     if (!enterprise) {
-  //       return res.status(404).json({ message: 'Enterprise not found' });
-  //     }
-  //     return res.view('pages/adminEnterprise', {
-  //       enterprise: enterprise,
-  //       user: user,
-  //     });
-  //   } catch (error) {
-  //     console.error('Failed to retrieve enterprise:', error);
-  //     return res
-  //       .status(500)
-  //       .json({ message: 'Failed to retrieve enterprise', error });
-  //   }
-  // },
   getEnterpriseList: async function (req, res) {
     try {
       let enterprises = await Enterprise.find({ role: { '!=': 99 } });
 
       enterprises = await Promise.all(enterprises.map(async (e) => {
-        const count = await User.count({ enterpriseId: e.id });
+        const count = await User.count({ enterpriseId: e.id, role: { '!=': 99 } });
+        await Enterprise.updateOne({ id: e.id }).set({ employeeCount: count });
         e.employeeCount = count;
         return e;
       }));
@@ -112,10 +93,11 @@ module.exports = {
         enterpriseId,
         role: { '!=': 99 },
       });
+      const enterpriseDetail=await Enterprise.find({id:enterpriseId});
 
       return res.view('pages/enterpriseDetails', {
         user: enterpriseUsers,
-        enterpriseId: enterpriseId,
+        enterprise: enterpriseDetail,
       });
     } catch (error) {
       console.error('Failed to retrieve users for enterprise:', error);
@@ -125,26 +107,39 @@ module.exports = {
     }
   },
   updateEnterprise: async function (req, res) {
-    const id = req.params.id; // Get the user ID from request parameters
-    console.log('----id', id);
     try {
-      // Find the user by ID
+      const id = req.params.id;
+      const { name, logo, email, managerName, managerDepartment } = req.body;
+      console.log('----id', id);
+      console.log('--updateEnterprise--id', req.body);
+
+      // Find the enterprise by ID
       const enterprise = await Enterprise.findOne({ id });
       if (!enterprise) {
-        return res.status(404).json({ message: 'User not found' });
+        return res.status(404).json({ message: 'Enterprise not found' });
       }
 
-      await Enterprise.updateOne({ id }).set(req.body);
+      await Enterprise.updateOne({ id }).set({
+        name,
+        logo,
+        manager: {
+          email,
+          name: managerName,
+          department: managerDepartment
+        },
+      });
 
-      return res.redirect(`/enterpriselist`);
+      return res.redirect('/enterpriselist');
     } catch (error) {
-      return res.status(500).json({ message: 'Failed to update', error });
+      // console.log('Update failed:', error);
+      return res.status(500).json({ message: 'Failed to update enterprise', error });
     }
   },
+
   removeEnterprise: async function (req, res) {
     const enterpriseId = req.params.id;
-    console.log('-----enterprise id controller', enterpriseId);
-    console.log('-----enterprise req controller', req.body);
+    // console.log('-----enterprise id controller', enterpriseId);
+    // console.log('-----enterprise req controller', req.body);
 
     try {
       const newRole = req.body.role;

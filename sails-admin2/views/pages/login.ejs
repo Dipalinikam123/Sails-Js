@@ -5,7 +5,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Login</title>
-    <link rel="stylesheet" href="/styles.css">
     <style>
         .login-container {
             margin: 20px auto;
@@ -61,20 +60,44 @@
 </head>
 
 <body>
+    <div class="login-container">
+        <h1>Login</h1>
+        <form id="loginForm" onsubmit="submitForm(event)">
+            <div>
+                <label for="email">Email:</label>
+                <input type="text" id="email" name="email">
+                <span id="emailError" class="error"></span>
+            </div>
+            <div>
+                <label for="password">Password:</label>
+                <input type="password" id="password" name="password">
+                <span id="passwordError" class="error"></span>
+            </div>
+            <button type="submit">Login</button>
+        </form>
+    </div>
+
     <script>
+        // Fetch the auth token from cookies
         function getCookie(name) {
             const cookies = document.cookie.split('; ');
             const cookie = cookies.find(row => row.startsWith(name + '='));
             return cookie ? cookie.split('=')[1] : null; // Return the value or null if not found
         }
 
+        // If auth token exists, redirect to home page
         const authToken = getCookie('authToken');
-        console.log('---authToken--', authToken);
         if (authToken) {
             window.location.href = '/';
         }
 
-        function validateForm(event) {
+
+
+
+        // Function to validate and submit the form via fetch
+        async function submitForm(event) {
+            event.preventDefault(); // Prevent form from submitting the default way
+
             // Clear previous error messages
             const errorElements = document.querySelectorAll('.error');
             errorElements.forEach(el => el.textContent = '');
@@ -101,31 +124,35 @@
                 document.getElementById('passwordError').textContent = 'Password must be at least 6 characters.';
             }
 
-            // Prevent form submission if validation fails
-            if (!valid) {
-                event.preventDefault();
+            // Proceed with fetch if validation is successful
+            if (valid) {
+                const formData = {
+                    email: emailInput.value,
+                    password: passwordInput.value,
+                };
+
+                const response = await fetch('/api/signin', {
+                    method: 'POST',
+                    body: JSON.stringify(formData),
+                });
+                window.location.reload()
+                // Handle response
+                const data = await response.json();
+                console.log('Response data:', data);
+
+                // Check for errors returned by the API
+                if (response.status === 401) {
+                    alert(data.error);
+                } else if (data.error) {
+                    alert('Error: ' + data.error);
+                } else {
+                    window.location.href = '/';
+                }
             }
         }
+
+
     </script>
-
-    <div class="login-container">
-        <h1>Login</h1>
-        <form action="/api/signin" method="POST" onsubmit="validateForm(event)">
-            <div>
-                <label for="email">Email:</label>
-                <input type="text" id="email" name="email">
-                <span id="emailError" class="error"></span>
-            </div>
-            <div>
-                <label for="password">Password:</label>
-                <input type="password" id="password" name="password">
-                <span id="passwordError" class="error"></span>
-            </div>
-            <button type="submit">Login</button>
-        </form>
-        <p>Don't Have an Account? <a href="/register">Register Here</a></p>
-    </div>
-
 </body>
 
 </html>

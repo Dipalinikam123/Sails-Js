@@ -5,11 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>User Profile</title>
     <style>
- 
-
       .profile-container {
         margin: 20px auto;
-
         background-color: #fff;
         padding: 20px;
         border-radius: 10px;
@@ -79,6 +76,10 @@
         border-radius: 5px;
         border: 1px solid #ddd;
       }
+
+      .error {
+        color: red;
+      }
     </style>
   </head>
 
@@ -94,15 +95,14 @@
           <span id="userEmail"> <%= user.email %> </span>
         </p>
         <p>
-          <strong>Role:</strong> <span id="userRole"> <%= user.role===0 ? 'SuperAdmin' : user.role===1 ? 'Admin' :'User' %> </span>
+          <strong>Role:</strong> <span id="userRole"> <%= user.role === 0 ? 'SuperAdmin' : user.role === 1 ? 'Admin' : 'User' %> </span>
         </p>
         <p>
-          <strong>Enterprise ID:</strong>
-          <span id="userEnterpriseId"> <%= user.enterpriseId %> </span>
+          <strong>Enterprise:</strong>
+          <span id="userEnterpriseId"> <%= enterprise.name %> </span>
         </p>
       </div>
       <button id="editProfile" class="button">Edit Profile</button>
-      
     </div>
 
     <!-- Modal for Editing Profile -->
@@ -110,7 +110,7 @@
       <div class="modal-content">
         <span class="close">&times;</span>
         <h2>Edit Profile</h2>
-        <form id="editForm" action="/api/user/<%= user.id %>" method="POST">
+        <form id="editForm" action="/api/user/<%= user.id %>" method="POST" onsubmit="validateUserEditForm(event)">
           <label for="editName">Name:</label>
           <input
             type="text"
@@ -118,21 +118,26 @@
             name="name"
             value="<%= user.name %>"
           />
+          <span id="nameError2" class="error"></span><br>
 
           <label for="editEmail">Email:</label>
           <input
-            type="email"
+            type="text"
             id="editEmail"
             name="email"
             value="<%= user.email %>"
           />
-          <label for="editEnterpriseId">Enterprise ID:</label>
+          <span id="emailError2" class="error"></span><br>
+
+          <label for="editEnterpriseId">Enterprise </label>
           <input
             type="text"
             id="editEnterpriseId"
             name="enterpriseId"
-            value="<%= user.enterpriseId %>"
+            value="<%= enterprise.name %>"
+            disabled
           />
+          <span id="enterpriseIdError2" class="error"></span><br>
 
           <button
             type="submit"
@@ -160,14 +165,56 @@
         window.location.href = "/login";
       }
 
-     
+      function validateUserEditForm(event) {
+        // Clear previous error messages
+        const errorElements = document.querySelectorAll('.error');
+        errorElements.forEach(el => el.textContent = '');
+
+        const edtNameInput = document.getElementById('editName');
+        const edtEmailInput = document.getElementById('editEmail');
+        const edtEnterpriseId = document.getElementById('editEnterpriseId');
+        let valid = true;
+
+        // Validate name
+        if (!edtNameInput.value) {
+          valid = false;
+          document.getElementById('nameError2').textContent = 'Name is required.';
+        }
+
+        // Validate email
+        if (!edtEmailInput.value) {
+          valid = false;
+          document.getElementById('emailError2').textContent = 'Email is required.';
+        } else if (!/\S+@\S+\.\S+/.test(edtEmailInput.value)) {
+          valid = false;
+          document.getElementById('emailError2').textContent = 'Invalid email format.';
+        }
+
+        // Validate enterprise ID if applicable
+        if (!edtEnterpriseId.value) {
+          valid = false;
+          document.getElementById('enterpriseIdError2').textContent = 'Enterprise ID is required.';
+        }
+
+        // Prevent form submission if validation fails
+        if (!valid) {
+          event.preventDefault();
+        }
+      }
 
       const editModal = document.getElementById("editModal");
       const editBtn = document.getElementById("editProfile");
       const closeModal = document.getElementsByClassName("close")[0];
 
       editBtn.onclick = () => (editModal.style.display = "flex");
-      closeModal.onclick = () => (editModal.style.display = "none");
+      closeModal.onclick = () => {
+        const errorElements = document.querySelectorAll('.error');
+        errorElements.forEach(el => el.textContent = '');
+        editModal.style.display = "none"
+        document.getElementById('editName').value='';
+        document.getElementById('editEmail').value=''
+        window.location.reload();
+      };
 
       window.onclick = (event) => {
         if (event.target == editModal) editModal.style.display = "none";

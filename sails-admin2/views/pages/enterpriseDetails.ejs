@@ -17,7 +17,7 @@
       display: flex;
       justify-content: center;
       align-items: center;
-      height: 100vh;
+      /* height: 100vh; */
     }
 
     table {
@@ -134,13 +134,25 @@
     button:hover {
       background-color: #218838;
     }
+    .detail {
+      display: flex;
+      justify-content: center;
+      margin-top: 30px;
+      font-size: 30px;
+    }
+    .detail p span{
+      color:black;
+      font-weight: bold;
+    }
   </style>
 </head>
 
 <body>
-
   <div class="main-div">
     <button id="addUserBtn">Add User</button>
+    <div class="detail">
+      <p><span>Enterprise:</span> <%= enterprise[0].name %></p>
+    </div>
     <div class="table-div">
       <table>
         <thead>
@@ -148,7 +160,7 @@
             <th>Name</th>
             <th>Email</th>
             <th>Role</th>
-            <th>Enterprise ID</th>
+            <!-- <th>Enterprise ID</th> -->
             <th>Action</th>
             <th>Action</th>
           </tr>
@@ -166,13 +178,12 @@
                 <td>
                   <%= e.role===0 ? 'SuperAdmin' : e.role===1 ? 'Admin' :'User' %>
                 </td>
-                <td>
+                <!-- <td>
                   <%= e.enterpriseId %>
-                </td>
+                </td> -->
                 <td>
                   <button class="editProfileBtn" data-id="<%= e.id %>" data-name="<%= e.name %>"
-                    data-email="<%= e.email %>"
-                    data-role="<%= e.role ===0 ? 'SuperAdmin' : e.role===1 ? 'Admin':'User' %>"
+                    data-email="<%= e.email %>" data-role="<%= e.role %>"
                     data-enterpriseId="<%= e.enterpriseId %>">Edit</button>
                 </td>
                 <td>
@@ -216,7 +227,7 @@
             <% }) %>
         </select>
         <span id="roleError" class="error"></span>
-        <input type="hidden" id="enterpriseId" name="enterpriseId" value="<%= enterpriseId %>" readonly><br><br>
+        <input type="hidden" id="enterpriseId" name="enterpriseId" value="<%= enterprise.id %>" readonly><br><br>
         <input type="hidden" id="addedBy" name="addedBy" value="superAdmin">
         <button type="submit">Submit</button>
       </form>
@@ -227,7 +238,7 @@
   <div id="editModal" class="modal">
     <div class="modal-content">
       <span class="close" id="closeEditModal">&times;</span>
-      <h2>Edit Profile</h2>
+      <h2>Edit User</h2>
       <form id="editForm" method="POST" onsubmit="validateUserEditForm(event)">
         <label for="editName">Name:</label>
         <input type="text" id="editName" name="name">
@@ -240,12 +251,19 @@
 
 
         <label for="editRole">Role:</label>
-        <input type="text" id="editRole" name="role">
+        <!-- <input type="text" id="editRole" name="role"> -->
+        <select id="editRole" name="role">
+          <% [0, 1, 2].map((role)=> { %>
+            <option value="<%= role %>">
+              <%= role===0? 'SuperAdmin' : role===1 ? 'Admin' : 'User' %>
+            </option>
+            <% }) %>
+        </select><br>
         <span id="roleError2" class="error"></span><br>
 
 
         <!-- <label for="editEnterpriseId">Enterprise ID:</label> -->
-        <input type="hidden" id="editEnterpriseId" name="enterpriseId" value="<%= enterpriseId %>" required>
+        <input type="hidden" id="editEnterpriseId" name="enterpriseId" value="<%= enterprise.id %>" required>
         <input type="hidden" id="addedBy" name="addedBy" value="superAdmin">
         <button type="submit" class="button" style="background-color: #28a745;">Save Changes</button>
       </form>
@@ -302,6 +320,8 @@
         const editForm = document.getElementById("editForm");
         editForm.action = `/api/user/${userId}`;
 
+        const errorElements = document.querySelectorAll('.error');
+        errorElements.forEach(el => el.textContent = '');
         editModal.style.display = "block";
       }
     });
@@ -337,52 +357,52 @@
     }
 
     function validateForm(event) {
-            // Clear previous error messages
-            const errorElements = document.querySelectorAll('.error');
-            errorElements.forEach(el => el.textContent = '');
+      // Clear previous error messages
+      const errorElements = document.querySelectorAll('.error');
+      errorElements.forEach(el => el.textContent = '');
 
-            const nameInput = document.getElementById('name');
-            const emailInput = document.getElementById('email');
-            const passwordInput = document.getElementById('password');
-            const roleInput = document.getElementById('role');
-            let valid = true;
+      const nameInput = document.getElementById('name');
+      const emailInput = document.getElementById('email');
+      const passwordInput = document.getElementById('password');
+      const roleInput = document.getElementById('role');
+      let valid = true;
 
-            // Validate name
-            if (!nameInput.value) {
-                valid = false;
-                document.getElementById('nameError').textContent = 'Name is required.';
-            }
+      // Validate name
+      if (!nameInput.value) {
+        valid = false;
+        document.getElementById('nameError').textContent = 'Name is required.';
+      }
 
-            // Validate email
-            if (!emailInput.value) {
-                valid = false;
-                document.getElementById('emailError').textContent = 'Email is required.';
-            } else if (!/\S+@\S+\.\S+/.test(emailInput.value)) {
-                valid = false;
-                document.getElementById('emailError').textContent = 'Invalid email format.';
-            }
+      // Validate email
+      if (!emailInput.value) {
+        valid = false;
+        document.getElementById('emailError').textContent = 'Email is required.';
+      } else if (!/\S+@\S+\.\S+/.test(emailInput.value)) {
+        valid = false;
+        document.getElementById('emailError').textContent = 'Invalid email format.';
+      }
 
-            // Validate password
-            if (!passwordInput.value) {
-                valid = false;
-                document.getElementById('passwordError').textContent = 'Password is required.';
-            } else if (passwordInput.value.length < 6) {
-                valid = false;
-                document.getElementById('passwordError').textContent = 'Password must be at least 6 characters.';
-            }
+      // Validate password
+      if (!passwordInput.value) {
+        valid = false;
+        document.getElementById('passwordError').textContent = 'Password is required.';
+      } else if (passwordInput.value.length < 6) {
+        valid = false;
+        document.getElementById('passwordError').textContent = 'Password must be at least 6 characters.';
+      }
 
-            // Validate role selection
-            if (roleInput.value === "") {
-                valid = false;
-                document.getElementById('roleError').textContent = 'Role is required.';
-            }
+      // Validate role selection
+      if (roleInput.value === "") {
+        valid = false;
+        document.getElementById('roleError').textContent = 'Role is required.';
+      }
 
-            // Prevent form submission if validation fails
-            if (!valid) {
-                event.preventDefault();
-            }
-        }
-        function validateUserEditForm(event) {
+      // Prevent form submission if validation fails
+      if (!valid) {
+        event.preventDefault();
+      }
+    }
+    function validateUserEditForm(event) {
       // Clear previous error messages
       const errorElements = document.querySelectorAll('.error');
       errorElements.forEach(el => el.textContent = '');

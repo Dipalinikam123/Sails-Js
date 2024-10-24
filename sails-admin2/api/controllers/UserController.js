@@ -21,15 +21,18 @@ module.exports = {
       }
 
       // Check if the email is already in use by another user
-      const existingUser = await User.findOne({ email, role: 0 });
+      if (role === 0) {
+        const existingSuperAdmin = await User.findOne({ role: 0 });
+        if (existingSuperAdmin) {
+          return res.status(400).json({ success: false, message: 'Super Admin exist.' });
+        }
+
+      }
+      const existingUser = await User.findOne({ email });
       if (existingUser) {
         return res.status(400).json({ success: false, message: 'Email already in use.' });
       }
-
-      // Hash the password
       const hash = await bcrypt.hash(password, 10);
-
-      // Create the new user
       const newUser = await User.create({
         name,
         email,
@@ -38,7 +41,6 @@ module.exports = {
         enterpriseId,
       }).fetch();
 
-      // Check if the user is being added by an admin
       if (addedBy === 'superAdmin' || addedBy === 'admin') {
         // Do not log in the new user automatically. Redirect the admin instead.
         if (addedBy === 'superAdmin') {
@@ -60,7 +62,6 @@ module.exports = {
       res.status(500).json({ success: false, message: error.message });
     }
   },
-
 
   getUserByToken: async function (req, res) {
     // const token = req.params.token
@@ -104,6 +105,8 @@ module.exports = {
     // console.log('===id', userId);
     try {
       const user = await User.findOne({ id: userId });
+      const enterprise = await Enterprise.findOne({ id: user.enterpriseId });
+
 
       if (!user) {
         return res.status(404).json({ message: 'User not found' });
@@ -111,6 +114,7 @@ module.exports = {
 
       return res.view('pages/profile', {
         user: user,
+        enterprise: enterprise
       });
     } catch (error) {
       console.error('Failed to retrieve user profile:', error);
@@ -120,7 +124,6 @@ module.exports = {
 
   updateUser: async function (req, res) {
     const id = req.params.id; // Get the user ID from request parameters
-    // console.log('---updateUser id', id);
     console.log('----update req body', req.body);
 
     try {
@@ -130,22 +133,24 @@ module.exports = {
         return res.status(404).json({ message: 'User not found' });
       }
 
-      const updatedUser = await User.updateOne({ id }).set(req.body);
 
+      // Update user
+      await User.updateOne({ id }).set(req.body);
+
+      // Redirect based on the addedBy property
       if (req.body.addedBy === 'superAdmin') {
-        return res.redirect(`/enterpriselist/${updatedUser.enterpriseId}`);
-      }
-
-      else if (req.body.addedBy === 'admin') {
-        return res.redirect(`/adminenterprise/${updatedUser.enterpriseId}`);
-      }
-      else {
+        return res.redirect(`/enterpriselist/${user.enterpriseId}`);
+      } else if (req.body.addedBy === 'admin') {
+        return res.redirect(`/adminenterprise/${user.enterpriseId}`);
+      } else {
         return res.redirect(`/userprofile/${id}`);
       }
     } catch (error) {
+      console.error('Update user error:', error); // Log the error for debugging
       return res.status(500).json({ message: 'Failed to update', error });
     }
   },
+
   removeUser: async function (req, res) {
     // console.log('req.body remove user---', req.body);
     try {
