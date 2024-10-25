@@ -108,7 +108,7 @@
     .modal-content {
       background-color: #fefefe;
       margin: 15% auto;
-      padding: 20px;
+      padding: 32px;
       border: 1px solid #888;
       width: 30%;
       border-radius: 8px;
@@ -173,7 +173,7 @@
 </head>
 
 <body>
-  <h1>Admin Enterprise</h1>
+  <!-- <h1>Admin Enterprise</h1> -->
 
   <h2>Enterprise Details</h2>
   <ul class="ul-container">
@@ -225,9 +225,6 @@
     <tbody>
       <% user.map(user=> { %>
         <tr>
-          <!-- <td>
-            <%= user.id %>
-          </td> -->
           <td>
             <%= user.name %>
           </td>
@@ -237,54 +234,57 @@
           <td>
             <%= user.role===0 ? 'SuperAdmin' : user.role===1 ? 'Admin' :'User' %>
           </td>
-          <!-- <td>
-            <%= user.enterpriseId %>
-          </td> -->
+
           <td>
             <button class="editProfileBtn submit-btn" data-id="<%= user.id %>" data-name="<%= user.name %>"
-              data-email="<%= user.email %>" data-role="<%= user.role %>"
-              data-enterpriseId="<%= user.enterpriseId %>">Edit</button>
+              data-email="<%= user.email %>" data-role="<%= user.role %>" data-enterpriseId="<%= user.enterpriseId %>"
+              data-login-user="<%= loginUser.role %>">Edit</button>
           </td>
           <td> <button class="removeUserBtn submit-btn"
-              onclick="removeUser('<%= user.id %>', '<%= user.enterpriseId %>')">Remove</button></td>
+              onclick="removeUser('<%= user.id %>','<%= user.enterpriseId %>','<%= user.role %>','<%= loginUser.role %>','<%= loginUser.id %>')">Remove</button>
+          </td>
         </tr>
         <% }); %>
     </tbody>
   </table>
 
   <!-- Modal for Adding Users -->
+  <!-- HTML for the Add User Modal -->
   <div id="userModal" class="modal">
     <div class="modal-content">
       <span class="close">&times;</span>
       <h2>Add User</h2>
-      <form action="/api/adduser" method="POST" onsubmit="validateUserAddForm(event)">
+      <form onsubmit="UserAddForm(event)">
         <label for="name">Name:</label>
         <input type="text" id="name" name="name"><br>
         <span id="nameError" class="error"></span>
+
         <label for="email">Email:</label>
         <input type="text" id="email" name="email"><br>
         <span id="emailError" class="error"></span>
+
         <label for="password">Password:</label>
         <input type="password" id="password" name="password"><br>
         <span id="passwordError" class="error"></span>
+
         <label for="role">Role:</label>
         <select id="role" name="role">
           <option value="">Select a Role</option>
-          <% [ 1, 2].map((role)=> { %>
+          <% [1, 2].map((role)=> { %>
             <option value="<%= role %>">
               <%= role===1 ? 'Admin' : 'User' %>
             </option>
             <% }) %>
-        </select><br>
+        </select>
+        <span id="roleError" class="error"></span><br>
 
-        <span id="roleError" class="error"></span>
-        <input type="hidden" id="enterpriseId" name="enterpriseId" value="<%= enterprise.id %>" readonly
-          required><br><br>
-        <input type="hidden" id="addedBy" name="addedBy" value="admin">
+        <input type="hidden" id="enterpriseId" name="enterpriseId" value="<%= enterprise.id %>" readonly required>
+        <input type="hidden" id="addedBy" name="addedBy" value="admin"><br>
         <button type="submit" class="submit-btn">Submit</button>
       </form>
     </div>
   </div>
+
 
   <!-- edit user model -->
   <div id="editModal" class="modal">
@@ -303,14 +303,13 @@
         <label for="editRole">Role:</label>
         <!-- <input type="text" id="editRole" name="role"> -->
         <select id="editRole" name="role">
-          <% [0, 1, 2].map((role)=> { %>
-            <option value="<%= role %>">
-              <%= role===0? 'SuperAdmin': role===1 ? 'Admin' : 'User' %>
+          <% [0, 1, 2].forEach((role)=> { %>
+            <option value="<%= role %>" <%=(loginUser.role !==0 && role===0) ? 'disabled' : '' %>>
+              <%= role===0 ? 'SuperAdmin' : role===1 ? 'Admin' : 'User' %>
             </option>
             <% }) %>
         </select><br>
         <span id="roleError2" class="error"></span><br>
-
         <!-- <label for="editEnterpriseId">Enterprise ID:</label> -->
         <input type="hidden" id="editEnterpriseId" name="enterpriseId" value="<%=enterprise.enterpriseId %>" required>
         <input type="hidden" id="addedBy" name="addedBy" value="admin">
@@ -403,6 +402,8 @@
         const userEmail = button.getAttribute("data-email");
         const userRole = button.getAttribute("data-role");
         const userEnterpriseId = button.getAttribute("data-enterpriseId");
+        const loginUser = button.getAttribute("data-login-user"); // Ensure this is also an integer
+
 
         // Populate the edit modal with user data
         document.getElementById("editName").value = userName;
@@ -414,50 +415,69 @@
         const editForm = document.getElementById("editForm");
         editForm.action = `/api/user/${userId}`;
 
-        editModal.style.display = "block";
+        if (loginUser !== '0' && userRole === '0') {
+          editModal.style.display = "none";
+          alert("Admin can't edit a SuperAdmin")
+        } else {
+          editModal.style.display = "block";
+        }
       }
     });
 
-    async function removeUser(id, enterpriseId) {
-      // console.log("------id , eId", id, enterpriseId);
-      if (confirm('Are you sure you want to remove this user?')) {
-        try {
-          const response = await fetch(`/user/remove/${id}`, {
-            method: 'DELETE',
-            headers: {
-              'Content-Type': 'application/json', // Set content type for JSON
-            },
-            body: JSON.stringify({ id, enterpriseId, addedBy: 'admin' }),
-          });
+    async function removeUser(id, enterpriseId, userRole, loginRole, loginUserId) {
+      const userRoleNumber = Number(userRole);
+      const loginRoleNumber = Number(loginRole);
 
-          alert('User removed successfully.');
-          window.location.reload(); // Reload page to reflect changes
-        } catch (error) {
-          console.error('Error:', error);
-          alert('An error occurred while removing the user.');
+      console.log("------id-----------loginUserId", loginUserId);
+      if (loginUserId === id) {
+        alert('You cant remove yourself')
+        return
+      }
+      if (userRoleNumber === 0 && loginRoleNumber !== 0) {
+        alert("Admin can't  remove a SuperAdmin")
+      }
+      else {
+        if (confirm('Are you sure you want to remove this user?')) {
+          try {
+            const response = await fetch(`/user/remove/${id}`, {
+              method: 'DELETE',
+              headers: {
+                'Content-Type': 'application/json', // Set content type for JSON
+              },
+              body: JSON.stringify({ id, enterpriseId, addedBy: 'admin' }),
+            });
+
+            alert('User removed successfully.');
+            window.location.reload(); // Reload page to reflect changes
+          } catch (error) {
+            console.error('Error:', error);
+            alert('An error occurred while removing the user.');
+          }
         }
       }
     }
 
 
-    function validateUserAddForm(event) {
+    // JavaScript for Form Validation and Submission
+    async function UserAddForm(event) {
+      event.preventDefault();
+
       // Clear previous error messages
-      const errorElements = document.querySelectorAll('.error');
-      errorElements.forEach(el => el.textContent = '');
+      document.querySelectorAll('.error').forEach(el => el.textContent = '');
 
       const nameInput = document.getElementById('name');
       const emailInput = document.getElementById('email');
       const passwordInput = document.getElementById('password');
       const roleInput = document.getElementById('role');
+      const enterpriseIdInput = document.getElementById('enterpriseId');
+      const addedBy = document.getElementById('addedBy');
       let valid = true;
 
-      // Validate name
+      // Validate inputs
       if (!nameInput.value) {
         valid = false;
         document.getElementById('nameError').textContent = 'Name is required.';
       }
-
-      // Validate email
       if (!emailInput.value) {
         valid = false;
         document.getElementById('emailError').textContent = 'Email is required.';
@@ -465,8 +485,6 @@
         valid = false;
         document.getElementById('emailError').textContent = 'Invalid email format.';
       }
-
-      // Validate password
       if (!passwordInput.value) {
         valid = false;
         document.getElementById('passwordError').textContent = 'Password is required.';
@@ -474,21 +492,41 @@
         valid = false;
         document.getElementById('passwordError').textContent = 'Password must be at least 6 characters.';
       }
-
-      // Validate role selection
       if (roleInput.value === "") {
         valid = false;
         document.getElementById('roleError').textContent = 'Role is required.';
       }
 
+      // If validation passed, send the data to the server
+      if (valid) {
+        const formData = {
+          name: nameInput.value,
+          email: emailInput.value,
+          password: passwordInput.value,
+          role: roleInput.value,
+          enterpriseId: enterpriseIdInput.value,
+          addedBy: addedBy.value,
+        };
 
-      // Prevent form submission if validation fails
-      if (!valid) {
-        event.preventDefault();
+
+        const response = await fetch('/api/adduser', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json', // Set content type for JSON
+          },
+          body: JSON.stringify(formData),
+        });
+
+        const data = await response.json();
+        console.log('---data----,', data)
+
+        if (!response.ok) {
+         alert(data.message || 'Something went wrong');
+        }
+
+        alert(data.message); 
       }
     }
-
-
 
 
   </script>

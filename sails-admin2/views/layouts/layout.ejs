@@ -129,7 +129,7 @@
         console.log('------user--', user.user.role);
         if (user.user.role === 0) {
           navLinks.innerHTML = `
-            <li><a href="/">Home</a></li>
+            <li><a href="/">Dashboard</a></li>
             <li><a href="/adminenterprise/${user.user.enterpriseId}">Enterprise</a></li>
             <li><a href="/enterpriselist">Enterprise List</a></li>
             <li><a href="/userprofile/${user.user.id}"> Profile</a></li>
@@ -139,7 +139,7 @@
         }
         else if (user.user.role === 1) {
           navLinks.innerHTML = `
-           <li><a href="/">Home</a></li>
+           <li><a href="/">Dashboard</a></li>
            <li><a href="/adminenterprise/${user.user.enterpriseId}">Enterprise</a></li>
            <li><a href="/userprofile/${user.user.id}"> Profile</a></li>
           `;
@@ -148,7 +148,7 @@
         }
         else {
           navLinks.innerHTML = `
-           <li><a href="/">Home</a></li>
+           <li><a href="/">Dashboard</a></li>
            <li><a href="/userprofile/${user.user.id}">Profile</a></li>
           `;
           logoutButton.style.display = 'block';

@@ -12,6 +12,7 @@ module.exports = {
     }
   },
   addUser: async function (req, res) {
+    console.log('---req body', req.body);
     try {
       const { name, email, password, role, enterpriseId, addedBy } = req.body;
 
@@ -21,7 +22,7 @@ module.exports = {
       }
 
       // Check if the email is already in use by another user
-      if (role === 0) {
+      if (role === '0') {
         const existingSuperAdmin = await User.findOne({ role: 0 });
         if (existingSuperAdmin) {
           return res.status(400).json({ success: false, message: 'Super Admin exist.' });
@@ -41,22 +42,15 @@ module.exports = {
         enterpriseId,
       }).fetch();
 
-      if (addedBy === 'superAdmin' || addedBy === 'admin') {
-        // Do not log in the new user automatically. Redirect the admin instead.
-        if (addedBy === 'superAdmin') {
-          return res.redirect(`/enterpriselist/${newUser.enterpriseId}`);
-        } else if (addedBy === 'admin') {
-          return res.redirect(`/adminenterprise/${newUser.enterpriseId}`);
-        }
+
+      if (addedBy === 'superAdmin') {
+        res.redirect(`/enterpriselist/${newUser.enterpriseId}`);
+      } else if (addedBy === 'admin') {
+        res.redirect(`/adminenterprise/${newUser.enterpriseId}`);
       } else {
-        // If it's not added by an admin, log in the new user (for cases like self-registration)
-        const token = jwt.sign({ _id: newUser.id, email: newUser.email }, secretKey);
-        await User.updateOne({ id: newUser.id }).set({ token });
-        res.cookie('authToken', token, { httpOnly: false, secure: true });
-
-        return res.redirect('/');
+        res.redirect('/');
       }
-
+      return res.json({ success: true, message: 'User created successfully!' });
     } catch (error) {
       console.log(error);
       res.status(500).json({ success: false, message: error.message });

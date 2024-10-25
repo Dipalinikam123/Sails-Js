@@ -1,224 +1,245 @@
 <!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>User Profile</title>
-    <style>
-      .profile-container {
-        margin: 20px auto;
-        background-color: #fff;
-        padding: 20px;
-        border-radius: 10px;
-        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-        text-align: center;
-        width: 80%;
-        max-width: 400px;
-      }
 
-      h1 {
-        color: #333;
-        margin-bottom: 20px;
-      }
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>User Profile</title>
+  <style>
+    .profile-container {
+      margin: 20px auto;
+      background-color: #fff;
+      padding: 20px;
+      border-radius: 10px;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+      text-align: center;
+      width: 80%;
+      max-width: 400px;
+    }
 
-      #profile-info p {
-        font-size: 1.1em;
-        color: #555;
-      }
+    h1 {
+      color: #333;
+      margin-bottom: 20px;
+    }
 
-      .button {
-        background-color: #007bff;
-        color: #fff;
-        border: none;
-        padding: 10px 20px;
-        border-radius: 5px;
-        cursor: pointer;
-        font-size: 1em;
-        transition: background-color 0.3s;
-        margin-top: 10px;
-      }
+    #profile-info p {
+      font-size: 1.1em;
+      color: #555;
+    }
 
-      .button:hover {
-        background-color: #0056b3;
-      }
+    .button {
+      background-color: #007bff;
+      color: #fff;
+      border: none;
+      padding: 10px 20px;
+      border-radius: 5px;
+      cursor: pointer;
+      font-size: 1em;
+      transition: background-color 0.3s;
+      margin-top: 10px;
+    }
 
-      .modal {
-        display: none;
-        position: fixed;
-        top: 0;
-        left: 0;
-        width: 100%;
-        height: 100%;
-        background-color: rgba(0, 0, 0, 0.5);
-        justify-content: center;
-        align-items: center;
-      }
+    .button:hover {
+      background-color: #0056b3;
+    }
 
-      .modal-content {
-        background-color: #fff;
-        padding: 20px;
-        border-radius: 10px;
-        width: 80%;
-        max-width: 400px;
-      }
+    .modal {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-color: rgba(0, 0, 0, 0.5);
+      justify-content: center;
+      align-items: center;
+    }
 
-      .close {
-        float: right;
-        font-size: 1.5em;
-        cursor: pointer;
-      }
+    .modal-content {
+      background-color: #fff;
+      padding: 20px;
+      border-radius: 10px;
+      width: 80%;
+      max-width: 400px;
+    }
 
-      input[type="text"],
-      input[type="email"] {
-        width: 100%;
-        padding: 8px;
-        margin: 10px 0;
-        border-radius: 5px;
-        border: 1px solid #ddd;
-      }
+    .close {
+      float: right;
+      font-size: 1.5em;
+      cursor: pointer;
+    }
 
-      .error {
-        color: red;
-      }
-    </style>
-  </head>
+    input[type="text"],
+    input[type="email"] {
+      width: 95%;
+      padding: 8px;
+      margin: 10px 0;
+      border-radius: 5px;
+      border: 1px solid #ddd;
+    }
 
-  <body>
-    <div class="profile-container" id="profileContainer" style="display: none">
-      <h1>Profile</h1>
-      <div id="profile-info">
-        <p>
-          <strong>Name:</strong> <span id="userName"> <%= user.name %> </span>
-        </p>
-        <p>
-          <strong>Email:</strong>
-          <span id="userEmail"> <%= user.email %> </span>
-        </p>
-        <p>
-          <strong>Role:</strong> <span id="userRole"> <%= user.role === 0 ? 'SuperAdmin' : user.role === 1 ? 'Admin' : 'User' %> </span>
-        </p>
-        <p>
-          <strong>Enterprise:</strong>
-          <span id="userEnterpriseId"> <%= enterprise.name %> </span>
-        </p>
-      </div>
-      <button id="editProfile" class="button">Edit Profile</button>
+    .error {
+      color: red;
+    }
+  </style>
+</head>
+
+<body>
+  <div class="profile-container" id="profileContainer" style="display: none">
+    <h1>Profile</h1>
+    <div id="profile-info">
+      <p>
+        <strong>Name:</strong> <span id="userName">
+          <%= user.name %>
+        </span>
+      </p>
+      <p>
+        <strong>Email:</strong>
+        <span id="userEmail">
+          <%= user.email %>
+        </span>
+      </p>
+      <p>
+        <strong>Role:</strong> <span id="userRole">
+          <%= user.role===0 ? 'SuperAdmin' : user.role===1 ? 'Admin' : 'User' %>
+        </span>
+      </p>
+      <p>
+        <strong>Enterprise:</strong>
+        <span id="userEnterpriseId">
+          <%= enterprise.name %>
+        </span>
+      </p>
     </div>
+    <button id="editProfile" class="button">Edit Profile</button>
+    <button id="removeProfile" class="button" onclick="removeUser('<%= user.id %>')">Remove Account</button>
 
-    <!-- Modal for Editing Profile -->
-    <div id="editModal" class="modal">
-      <div class="modal-content">
-        <span class="close">&times;</span>
-        <h2>Edit Profile</h2>
-        <form id="editForm" action="/api/user/<%= user.id %>" method="POST" onsubmit="validateUserEditForm(event)">
-          <label for="editName">Name:</label>
-          <input
-            type="text"
-            id="editName"
-            name="name"
-            value="<%= user.name %>"
-          />
-          <span id="nameError2" class="error"></span><br>
+  </div>
 
-          <label for="editEmail">Email:</label>
-          <input
-            type="text"
-            id="editEmail"
-            name="email"
-            value="<%= user.email %>"
-          />
-          <span id="emailError2" class="error"></span><br>
+  <!-- Modal for Editing Profile -->
+  <div id="editModal" class="modal">
+    <div class="modal-content">
+      <span class="close">&times;</span>
+      <h2>Edit Profile</h2>
+      <form id="editForm" action="/api/user/<%= user.id %>" method="POST" onsubmit="validateUserEditForm(event)">
+        <label for="editName">Name:</label>
+        <input type="text" id="editName" name="name" value="<%= user.name %>" />
+        <span id="nameError2" class="error"></span><br>
 
-          <label for="editEnterpriseId">Enterprise </label>
-          <input
-            type="text"
-            id="editEnterpriseId"
-            name="enterpriseId"
-            value="<%= enterprise.name %>"
-            disabled
-          />
-          <span id="enterpriseIdError2" class="error"></span><br>
+        <label for="editEmail">Email:</label>
+        <input type="text" id="editEmail" name="email" value="<%= user.email %>" />
+        <span id="emailError2" class="error"></span><br>
 
-          <button
-            type="submit"
-            class="button"
-            style="background-color: #28a745"
-          >
-            Save Changes
-          </button>
-        </form>
-      </div>
+        <label for="editEnterpriseId">Enterprise </label>
+        <input type="text" id="editEnterpriseId" name="enterpriseId" value="<%= enterprise.name %>" disabled />
+        <span id="enterpriseIdError2" class="error"></span><br>
+
+        <button type="submit" class="button" style="background-color: #28a745">
+          Save Changes
+        </button>
+      </form>
     </div>
+  </div>
 
-    <script>
-      function getCookie(name) {
-        const cookies = document.cookie.split("; ");
-        const cookie = cookies.find((row) => row.startsWith(name + "="));
-        return cookie ? cookie.split("=")[1] : null; // Return the value or null if not found
+  <script>
+    function getCookie(name) {
+      const cookies = document.cookie.split("; ");
+      const cookie = cookies.find((row) => row.startsWith(name + "="));
+      return cookie ? cookie.split("=")[1] : null; // Return the value or null if not found
+    }
+
+    const authToken = getCookie("authToken");
+    console.log("---authToken--", authToken);
+    if (authToken) {
+      document.getElementById("profileContainer").style.display = "block";
+    } else {
+      window.location.href = "/login";
+    }
+
+    function validateUserEditForm(event) {
+      // Clear previous error messages
+      const errorElements = document.querySelectorAll('.error');
+      errorElements.forEach(el => el.textContent = '');
+
+      const edtNameInput = document.getElementById('editName');
+      const edtEmailInput = document.getElementById('editEmail');
+      const edtEnterpriseId = document.getElementById('editEnterpriseId');
+      let valid = true;
+
+      // Validate name
+      if (!edtNameInput.value) {
+        valid = false;
+        document.getElementById('nameError2').textContent = 'Name is required.';
       }
 
-      const authToken = getCookie("authToken");
-      console.log("---authToken--", authToken);
-      if (authToken) {
-        document.getElementById("profileContainer").style.display = "block";
-      } else {
-        window.location.href = "/login";
+      // Validate email
+      if (!edtEmailInput.value) {
+        valid = false;
+        document.getElementById('emailError2').textContent = 'Email is required.';
+      } else if (!/\S+@\S+\.\S+/.test(edtEmailInput.value)) {
+        valid = false;
+        document.getElementById('emailError2').textContent = 'Invalid email format.';
       }
 
-      function validateUserEditForm(event) {
-        // Clear previous error messages
-        const errorElements = document.querySelectorAll('.error');
-        errorElements.forEach(el => el.textContent = '');
-
-        const edtNameInput = document.getElementById('editName');
-        const edtEmailInput = document.getElementById('editEmail');
-        const edtEnterpriseId = document.getElementById('editEnterpriseId');
-        let valid = true;
-
-        // Validate name
-        if (!edtNameInput.value) {
-          valid = false;
-          document.getElementById('nameError2').textContent = 'Name is required.';
-        }
-
-        // Validate email
-        if (!edtEmailInput.value) {
-          valid = false;
-          document.getElementById('emailError2').textContent = 'Email is required.';
-        } else if (!/\S+@\S+\.\S+/.test(edtEmailInput.value)) {
-          valid = false;
-          document.getElementById('emailError2').textContent = 'Invalid email format.';
-        }
-
-        // Validate enterprise ID if applicable
-        if (!edtEnterpriseId.value) {
-          valid = false;
-          document.getElementById('enterpriseIdError2').textContent = 'Enterprise ID is required.';
-        }
-
-        // Prevent form submission if validation fails
-        if (!valid) {
-          event.preventDefault();
-        }
+      // Validate enterprise ID if applicable
+      if (!edtEnterpriseId.value) {
+        valid = false;
+        document.getElementById('enterpriseIdError2').textContent = 'Enterprise ID is required.';
       }
 
-      const editModal = document.getElementById("editModal");
-      const editBtn = document.getElementById("editProfile");
-      const closeModal = document.getElementsByClassName("close")[0];
+      // Prevent form submission if validation fails
+      if (!valid) {
+        event.preventDefault();
+      }
+    }
 
-      editBtn.onclick = () => (editModal.style.display = "flex");
-      closeModal.onclick = () => {
-        const errorElements = document.querySelectorAll('.error');
-        errorElements.forEach(el => el.textContent = '');
-        editModal.style.display = "none"
-        document.getElementById('editName').value='';
-        document.getElementById('editEmail').value=''
-        window.location.reload();
-      };
+    const editModal = document.getElementById("editModal");
+    const editBtn = document.getElementById("editProfile");
+    const closeModal = document.getElementsByClassName("close")[0];
 
-      window.onclick = (event) => {
-        if (event.target == editModal) editModal.style.display = "none";
-      };
-    </script>
-  </body>
+    editBtn.onclick = () => (editModal.style.display = "flex");
+    closeModal.onclick = () => {
+      const errorElements = document.querySelectorAll('.error');
+      errorElements.forEach(el => el.textContent = '');
+      editModal.style.display = "none"
+      document.getElementById('editName').value = '';
+      document.getElementById('editEmail').value = ''
+      window.location.reload();
+    };
+
+    window.onclick = (event) => {
+      if (event.target == editModal) editModal.style.display = "none";
+    };
+
+
+    async function removeUser(id, enterpriseId) {
+
+      if (confirm('Are you sure you want to remove your Account?')) {
+        try {
+          const response = await fetch(`/user/remove/${id}`, {
+            method: 'DELETE',
+            headers: {
+              'Content-Type': 'application/json', // Set content type for JSON
+            },
+            body: JSON.stringify({ id }),
+          });
+
+          alert('Your Account removed successfully.');
+
+          document.cookie = "authToken=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
+          localStorage.removeItem('authToken');
+          window.location.href = '/';
+
+        } catch (error) {
+          console.error('Error:', error);
+          alert('An error occurred while removing the user.');
+        }
+      }
+    }
+
+
+
+  </script>
+</body>
+
 </html>

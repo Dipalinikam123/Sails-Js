@@ -40,6 +40,8 @@ module.exports = {
   },
   getAdminEnterprise: async function (req, res) {
     const enterpriseId = req.params.id;
+    const loginUser=req.user;
+    // console.log('-----loginUser',loginUser);
     try {
       const enterprise = await Enterprise.findOne({ id: enterpriseId });
 
@@ -47,9 +49,9 @@ module.exports = {
         return res.status(404).json({ message: 'Enterprise not found' });
       }
 
-      const employeeCount = await User.count({ enterpriseId: enterpriseId, role: { '!=': 99 } });
+      const employeeCount = await User.count({ enterpriseId: enterpriseId, role: { '!=': 99 } }); 
 
-      const users = await User.find({ enterpriseId, role: { '!=': 99 } });
+      const users = await User.find({ enterpriseId, role: { '!=': 99 } }); // fetch selected fields
 
       enterprise.employeeCount = employeeCount;
       await Enterprise.updateOne({ id: enterpriseId }).set({ employeeCount: employeeCount });
@@ -58,6 +60,7 @@ module.exports = {
       return res.view('pages/adminEnterprise', {
         enterprise: enterprise,
         user: users,
+        loginUser:loginUser
       });
     } catch (error) {
       console.error('Failed to retrieve enterprise:', error);
@@ -86,6 +89,7 @@ module.exports = {
 
   getEnterpriseDetail: async function (req, res) {
     const enterpriseId = req.params.id;
+    const loginUser=req.user;
     // console.log('----Enterprise ID detail:', enterpriseId);
 
     try {
@@ -98,6 +102,7 @@ module.exports = {
       return res.view('pages/enterpriseDetails', {
         user: enterpriseUsers,
         enterprise: enterpriseDetail,
+        loginUser:loginUser,
       });
     } catch (error) {
       console.error('Failed to retrieve users for enterprise:', error);
