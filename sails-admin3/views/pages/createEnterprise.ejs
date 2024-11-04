@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Create Enterprise</title>
+    <link rel="stylesheet" href="/styles.css"> 
+    <style>
+        .form-container {
+            background-color: #fff;
+            padding: 30px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+            border-radius: 5px;
+            width: 400px;
+            margin: 20px auto;
+        }
+
+        h1 {
+            text-align: center;
+            padding: 0;
+            margin: 0;
+        }
+
+        label {
+            display: block;
+            margin: 10px 0 5px;
+        }
+
+        input {
+            width: 95%;
+            padding: 8px;
+            margin-bottom: 5px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+
+        button {
+            width: 100%;
+            padding: 10px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background-color: #45a049;
+        }
+
+        .error {
+            color: red;
+            font-size: 12px;
+            /* margin-top: -10px; */
+            margin-bottom: 15px;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="form-container">
+        <h1>Create Enterprise</h1>
+        <form id="enterpriseForm"  onsubmit="return validateForm(event)">
+            <label for="name">Enterprise Name:</label>
+            <input type="text" id="name" name="name">
+            <span id="nameError" class="error"></span>
+
+            <label for="logo">Logo URL:</label>
+            <input type="text" id="logo" name="logo">
+            <span id="logoError" class="error"></span>
+
+            <h2>Manager Details</h2>
+            <label for="managerName">Manager Name:</label>
+            <input type="text" id="managerName" name="manager[name]">
+            <span id="managerNameError" class="error"></span>
+
+            <label for="managerEmail">Manager Email:</label>
+            <input type="text" id="managerEmail" name="manager[email]">
+            <span id="managerEmailError" class="error"></span>
+
+            <label for="managerDepartment">Manager Department:</label>
+            <input type="text" id="managerDepartment" name="manager[department]">
+            <span id="managerDepartmentError" class="error"></span>
+
+            <button type="submit">Create Enterprise</button>
+        </form>
+    </div>
+
+    <script>
+       async function validateForm(event) {
+            // Clear previous error messages
+            const errorElements = document.querySelectorAll('.error');
+            errorElements.forEach(el => el.textContent = '');
+
+            const nameInput = document.getElementById('name');
+            const logoInput = document.getElementById('logo');
+            const managerNameInput = document.getElementById('managerName');
+            const managerEmailInput = document.getElementById('managerEmail');
+            const managerDepartmentInput = document.getElementById('managerDepartment');
+            let valid = true;
+
+            if (!nameInput.value) {
+                valid = false;
+                document.getElementById('nameError').textContent = 'Enterprise name is required.';
+            }
+
+            if (logoInput.value && !/^https?:\/\/.+\..+/.test(logoInput.value)) {
+                valid = false;
+                document.getElementById('logoError').textContent = 'Invalid URL format for the logo.';
+            }
+
+            if (!managerNameInput.value) {
+                valid = false;
+                document.getElementById('managerNameError').textContent = 'Manager name is required.';
+            }
+
+            if (!managerEmailInput.value) {
+                valid = false;
+                document.getElementById('managerEmailError').textContent = 'Manager email is required.';
+            } else if (!/\S+@\S+\.\S+/.test(managerEmailInput.value)) {
+                valid = false;
+                document.getElementById('managerEmailError').textContent = 'Invalid email format.';
+            }
+
+            if (!managerDepartmentInput.value) {
+                valid = false;
+                document.getElementById('managerDepartmentError').textContent = 'Manager department is required.';
+            }
+
+
+            if (valid) {
+                const enterpriseData = {
+                    name: nameInput.value,
+                    logo: logoInput.value,
+                    managerName: managerNameInput.value,
+                    managerEmail: managerEmailInput.value,
+                    managerDepartment: managerDepartmentInput.value,
+                };
+
+                try {
+                    const response = await fetch('/api/enterprise', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify(enterpriseData),
+                    });
+
+                    const data = await response.json();
+                    
+                    if (response.status === 401) {
+                        alert(data.error);
+                    } else if (data.error) {
+                        alert('Error: ' + data.error);
+                    } else {
+                        window.location.href = '/enterpriselist';
+                    }
+                } catch (error) {
+                    console.error('Fetch error:', error);
+                    alert('An error occurred. Please try again later.');
+                }
+
+            }
+        }
+    </script>
+
+</body>
+
+</html>

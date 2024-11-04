@@ -1,0 +1,308 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Enterprise Details</title>
+  <style>
+    table {
+      width: 80%;
+      border-collapse: collapse;
+      margin: 20px auto;
+      background-color: #fff;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    }
+
+    th,
+    td {
+      padding: 12px;
+      text-align: center;
+      border-bottom: 1px solid #ddd;
+    }
+
+    th {
+      background-color: #4caf50;
+      color: white;
+      font-weight: bold;
+    }
+
+    tr:nth-child(even) {
+      background-color: #f2f2f2;
+    }
+
+    tr:hover {
+      background-color: #e0e0e0;
+    }
+
+    .logo {
+      max-width: 100px;
+      max-height: 50px;
+    }
+
+    .modal {
+      display: none;
+      position: fixed;
+      z-index: 1;
+      padding-top: 60px;
+      left: 0;
+      top: 0;
+      width: 100%;
+      height: 100%;
+      overflow: auto;
+      background-color: rgba(0, 0, 0, 0.5);
+    }
+
+    .modal-content {
+      background-color: #fff;
+      margin: 5% auto;
+      padding: 20px;
+      border: 1px solid #888;
+      width: 80%;
+      max-width: 500px;
+      border-radius: 8px;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+    }
+
+    .close {
+      color: #aaa;
+      float: right;
+      font-size: 28px;
+      font-weight: bold;
+    }
+
+    .close:hover,
+    .close:focus {
+      color: black;
+      text-decoration: none;
+      cursor: pointer;
+    }
+
+    label {
+      font-weight: bold;
+      margin: 10px 0 5px;
+      display: block;
+    }
+
+    input[type="text"],
+    input[type="email"],
+    input[type="number"] {
+      width: 95%;
+      padding: 10px;
+      margin: 5px 0 15px;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+    }
+
+    button {
+      background-color: #28a745;
+      color: white;
+      padding: 10px 15px;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 16px;
+    }
+
+    button:hover {
+      background-color: #218838;
+    }
+    .error{
+      color: red;
+    }
+  </style>
+</head>
+
+<body>
+  <div>
+    <button onclick="window.location.href='/createEnterprise'">
+      Create Enterprise
+    </button>
+
+    <% if (enterprise.length === 0) { %>
+      <p>No Enterprises Found</p>
+    <% } else { %>
+      <table>
+        <thead>
+          <tr>
+            <th>Name</th>
+            <th>Logo</th>
+            <th>Employee Count</th>
+            <th>Manager Name</th>
+            <th>Manager Email</th>
+            <th>Manager Department</th>
+            <th>View</th>
+            <th>Update</th>
+            <th>Remove</th>
+          </tr>
+        </thead>
+        <tbody>
+          <% enterprise.map(e => { %>
+            <tr>
+              <td><%= e.name %></td>
+              <td><img src="<%= e.logo %>" alt="Logo" class="logo" /></td>
+              <td><%= e.employeeCount %></td>
+              <td><%= e.manager.name %></td>
+              <td><%= e.manager.email %></td>
+              <td><%= e.manager.department %></td>
+              <td>
+                <button onclick="window.location.href='/enterpriselist/<%= e.id %>'">View</button>
+              </td>
+              <td>
+                <button class="editProfileBtn" data-id="<%= e.id %>" data-name="<%= e.name %>"
+                  data-logo="<%= e.logo %>" data-email="<%= e.manager.email %>"
+                  data-managerName="<%= e.manager.name %>" data-enterpriseId="<%= e.enterpriseId %>"
+                  data-employeeCount="<%= e.employeeCount %>" data-managerDepartment="<%= e.manager.department %>">
+                  Edit
+                </button>
+              </td>
+              <td>
+                <button class="removeEnterpriseBtn" onclick="removeEnterprise('<%= e.id %>')">Remove</button>
+              </td>
+            </tr>
+          <% }) %>
+        </tbody>
+      </table>
+    <% } %>
+  </div>
+
+  <!-- Modal Structure -->
+  <div id="editModal" class="modal">
+    <div class="modal-content">
+      <span class="close" id="closeEditModal">&times;</span>
+      <h2>Edit Enterprise</h2>
+      <form id="editForm" method="POST" onsubmit="validateEnterpriseForm(event)">
+        <label for="editName">Name:</label>
+        <input type="text" id="editName" name="name" />
+        <span id="nameError2" class="error"></span>
+
+        <label for="editLogo">Logo URL:</label>
+        <input type="text" id="editLogo" name="logo" oninput="previewLogo()" />
+        <span id="logoError2" class="error"></span>
+        <img id="logoPreview" src="" alt="Logo Preview" style="display:none; max-width: 100px; margin-top: 10px;" />
+
+        <label for="editManagerName">Manager Name:</label>
+        <input type="text" id="editManagerName" name="managerName" />
+        <span id="managerNameError2" class="error"></span>
+
+        <label for="editEmail">Manager Email:</label>
+        <input type="text" id="editEmail" name="email" />
+        <span id="managerEmailError2" class="error"></span>
+
+        <label for="editManagerDepartment">Manager Department:</label>
+        <input type="text" id="editManagerDepartment" name="managerDepartment" />
+        <span id="managerDepartmentError2" class="error"></span>
+
+        <input type="hidden" id="editEnterpriseId" name="enterpriseId" />
+        <button type="submit" class="button">Save Changes</button>
+      </form>
+    </div>
+  </div>
+
+  <script>
+  
+    const editModal = document.getElementById("editModal");
+    const closeEditModalBtn = document.getElementById("closeEditModal");
+
+    document.addEventListener("click", function (event) {
+      if (event.target.classList.contains("editProfileBtn")) {
+        const button = event.target;
+        const enterpriseId = button.getAttribute("data-id");
+        const enterpriseName = button.getAttribute("data-name");
+        const enterpriseLogo = button.getAttribute("data-logo");
+        const enterpriseManagerName = button.getAttribute("data-managerName");
+        const enterpriseEmail = button.getAttribute("data-email");
+        const enterpriseDepartment = button.getAttribute("data-managerDepartment");
+
+        document.getElementById("editName").value = enterpriseName;
+        document.getElementById("editLogo").value = enterpriseLogo;
+        document.getElementById("editManagerName").value = enterpriseManagerName;
+        document.getElementById("editEmail").value = enterpriseEmail;
+        document.getElementById("editManagerDepartment").value = enterpriseDepartment;
+        document.getElementById("editEnterpriseId").value = enterpriseId;
+
+        const editForm = document.getElementById("editForm");
+        editForm.action = `/enterprise/update/${enterpriseId}`;
+        editModal.style.display = "block";
+      }
+    });
+
+    closeEditModalBtn.onclick = function () {
+      editModal.style.display = "none";
+    };
+
+    window.onclick = function (event) {
+      if (event.target === editModal) {
+        editModal.style.display = "none";
+      }
+    };
+    function validateEnterpriseForm(event) {
+            const errorElements = document.querySelectorAll('.error');
+            errorElements.forEach(el => el.textContent = '');
+    
+            const nameInput = document.getElementById('editName');
+            const logoInput = document.getElementById('editLogo');
+            const managerNameInput = document.getElementById('editManagerName');
+            const managerEmailInput = document.getElementById('editEmail');
+            const managerDepartmentInput = document.getElementById('editManagerDepartment');
+            let valid = true;
+    
+            if (!nameInput.value) {
+                valid = false;
+                document.getElementById('nameError2').textContent = 'Enterprise name is required.';
+            }
+    
+            if (logoInput.value && !/^https?:\/\/.+\..+/.test(logoInput.value)) {
+                valid = false;
+                document.getElementById('logoError2').textContent = 'Invalid URL format for the logo.';
+            }
+    
+            if (!managerNameInput.value) {
+                valid = false;
+                document.getElementById('managerNameError2').textContent = 'Manager name is required.';
+            }
+    
+            if (!managerEmailInput.value) {
+                valid = false;
+                document.getElementById('managerEmailError2').textContent = 'Manager email is required.';
+            } else if (!/\S+@\S+\.\S+/.test(managerEmailInput.value)) {
+                valid = false;
+                document.getElementById('managerEmailError2').textContent = 'Invalid email format.';
+            }
+    
+            if (!managerDepartmentInput.value) {
+                valid = false;
+                document.getElementById('managerDepartmentError2').textContent = 'Manager department is required.';
+            }
+    
+            if (!valid) {
+                event.preventDefault();
+            }
+        }
+
+    async function removeEnterprise(id) {
+      if (confirm("Are you sure you want to remove this enterprise?")) {
+        try {
+          const response = await fetch(`/enterprise/remove/${id}`, {
+            method: "DELETE",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({ role: 99 }),
+          });
+
+
+          alert("Enterprise removed successfully.");
+          window.location.reload();
+
+        } catch (error) {
+          alert("An error occurred while removing the enterprise.");
+        }
+      }
+    }
+
+    
+  </script>
+</body>
+
+</html>

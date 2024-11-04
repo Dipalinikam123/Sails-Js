@@ -1,0 +1,482 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Add User</title>
+  <style>
+    .main-div {
+      background-color: #f4f4f4;
+    }
+
+    .table-div {
+      font-family: Arial, sans-serif;
+      margin: 0;
+      padding: 20px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      /* height: 100vh; */
+    }
+
+    table {
+      width: 80%;
+      border-collapse: collapse;
+      margin: 20px auto;
+      background-color: #fff;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    }
+
+    th,
+    td {
+      padding: 12px;
+      text-align: center;
+      border-bottom: 1px solid #ddd;
+    }
+
+    th {
+      background-color: #4caf50;
+      color: white;
+    }
+
+    tr:nth-child(even) {
+      background-color: #f2f2f2;
+    }
+
+    tr:hover {
+      background-color: #e0e0e0;
+    }
+
+    button {
+      padding: 10px 15px;
+      background-color: #4caf50;
+      color: white;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+
+    .modal {
+      display: none;
+      position: fixed;
+      z-index: 1;
+      left: 0;
+      top: 0;
+      width: 100%;
+      height: 100%;
+      background-color: rgba(0, 0, 0, 0.5);
+    }
+
+    .modal-content {
+      background-color: #fefefe;
+      margin: 10% auto;
+      padding: 20px;
+      border: 1px solid #888;
+      width: 29%;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    }
+
+    .close {
+      color: #aaa;
+      float: right;
+      font-size: 28px;
+      font-weight: bold;
+    }
+
+    .error {
+      color: red;
+    }
+
+    .close:hover,
+    .close:focus {
+      color: black;
+      text-decoration: none;
+      cursor: pointer;
+    }
+
+    h1 {
+      text-align: center;
+      color: #333;
+    }
+
+    label {
+      display: block;
+      margin-bottom: 5px;
+      color: #555;
+    }
+
+    input[type="text"],
+    input[type="email"],
+    input[type="password"],
+    select {
+      width: 100%;
+      padding: 10px;
+      margin-bottom: 5px;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+      box-sizing: border-box;
+    }
+
+    .login-container span {
+      margin-bottom: 20px;
+    }
+
+    .error {
+      color: red;
+      font-size: 12px;
+      margin-bottom: 10px;
+    }
+
+    button:hover {
+      background-color: #218838;
+    }
+
+    .detail {
+      display: flex;
+      justify-content: center;
+      margin-top: 30px;
+      font-size: 30px;
+    }
+
+    .detail p span {
+      color: black;
+      font-weight: bold;
+    }
+  </style>
+</head>
+
+<body>
+  <div class="main-div">
+    <button id="addUserBtn">Add User</button>
+    <div class="detail">
+      <p>
+        <span>Enterprise:</span>
+        <%= enterprise[0].name %>
+      </p>
+    </div>
+    <div class="table-div">
+      <table>
+        <thead>
+          <tr>
+            <th>Name</th>
+            <th>Email</th>
+            <th>Role</th>
+            <!-- <th>Enterprise ID</th> -->
+            <th>Action</th>
+            <th>Action</th>
+          </tr>
+        </thead>
+        <tbody>
+          <% if (Array.isArray(user) && user.length) { %>
+            <% user.map(e=> { %>
+              <tr>
+                <td>
+                  <%= e.name %>
+                </td>
+                <td>
+                  <%= e.email %>
+                </td>
+                <td>
+                  <%= e.role===0 ? 'SuperAdmin' : e.role===1 ? 'Admin' :'User' %>
+                </td>
+                <!-- <td>
+                  <%= e.enterpriseId %>
+                </td> -->
+                <td>
+                  <button class="editProfileBtn" data-id="<%= e.id %>" data-name="<%= e.name %>"
+                    data-email="<%= e.email %>" data-role="<%= e.role %>" data-enterpriseId="<%= e.enterpriseId %>">
+                    Edit
+                  </button>
+                </td>
+                <td>
+                  <button class="removeUserBtn"
+                    onclick="removeUser('<%= e.id %>', '<%= e.enterpriseId %>','<%= loginUser.id %>')">
+                    Remove
+                  </button>
+                </td>
+              </tr>
+              <% }) %>
+                <% } else { %>
+                  <tr>
+                    <td colspan="6">No users found.</td>
+                  </tr>
+                  <% } %>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- user Create Modal -->
+  <div id="userModal" class="modal">
+    <div class="modal-content">
+      <span class="close">&times;</span>
+      <h2>Add User</h2>
+      <form onsubmit="validateUserAddForm(event)">
+        <label for="name">Name:</label>
+        <input type="text" id="name" name="name" /><br />
+        <span id="nameError" class="error"></span>
+
+        <label for="email">Email:</label>
+        <input type="text" id="email" name="email" /><br />
+        <span id="emailError" class="error"></span>
+
+        <label for="password">Password:</label>
+        <input type="password" id="password" name="password" /><br />
+        <span id="passwordError" class="error"></span>
+
+        <label for="role">Role:</label>
+        <select id="role" name="role">
+          <option value="">Select a Role</option>
+          <% [1, 2].map((role)=> { %>
+            <option value="<%= role %>">
+              <%= role===1 ? 'Admin' : 'User' %>
+            </option>
+            <% }) %>
+        </select>
+        <span id="roleError" class="error"></span><br />
+
+        <input type="hidden" id="enterpriseId" name="enterpriseId" value="<%= enterprise[0].id %>" readonly required />
+        <input type="hidden" id="addedBy" name="addedBy" value="admin" /><br />
+        <button type="submit" class="submit-btn">Submit</button>
+      </form>
+    </div>
+  </div>
+
+  <!-- Modal for Editing User Profile -->
+  <div id="editModal" class="modal">
+    <div class="modal-content">
+      <span class="close" id="closeEditModal">&times;</span>
+      <h2>Edit User</h2>
+      <form id="editForm" method="POST" onsubmit="validateUserEditForm(event)">
+        <label for="editName">Name:</label>
+        <input type="text" id="editName" name="name" />
+        <span id="nameError2" class="error"></span>
+
+        <label for="editEmail">Email:</label>
+        <input type="text" id="editEmail" name="email" />
+        <span id="emailError2" class="error"></span>
+
+        <label for="editRole">Role:</label>
+        <!-- <input type="text" id="editRole" name="role"> -->
+        <select id="editRole" name="role">
+          <% [0, 1, 2].map((role)=> { %>
+            <option value="<%= role %>">
+              <%= role===0? 'SuperAdmin' : role===1 ? 'Admin' : 'User' %>
+            </option>
+            <% }) %>
+        </select><br />
+        <span id="roleError2" class="error"></span><br />
+
+        <!-- <label for="editEnterpriseId">Enterprise ID:</label> -->
+        <input type="hidden" id="editEnterpriseId" name="enterpriseId" value="<%= enterprise.id %>" required />
+        <input type="hidden" id="addedBy" name="addedBy" value="superAdmin" />
+        <button type="submit" class="button" style="background-color: #28a745">
+          Save Changes
+        </button>
+      </form>
+    </div>
+  </div>
+
+  <script>
+    const modal = document.getElementById("userModal");
+    const btn = document.getElementById("addUserBtn");
+    const closeButtons = document.getElementsByClassName("close");
+
+    btn.onclick = function () {
+      document.getElementById("name").value = "";
+      document.getElementById("email").value = "";
+      document.getElementById("password").value = "";
+      document.getElementById("role").value = "";
+      modal.style.display = "block";
+    };
+
+    for (let closeButton of closeButtons) {
+      closeButton.onclick = function () {
+        modal.style.display = "none";
+        editModal.style.display = "none"; 
+
+        document.getElementById("name").value = "";
+        document.getElementById("email").value = "";
+        document.getElementById("password").value = "";
+        document.getElementById("role").value = "";
+        const errorElements = document.querySelectorAll(".error");
+        errorElements.forEach((el) => (el.textContent = ""));
+      };
+    }
+    window.onclick = function (event) {
+      if (event.target === modal) {
+        modal.style.display = "none";
+      }
+    };
+
+    const editButtons = document.querySelectorAll(".editProfileBtn");
+    const editModal = document.getElementById("editModal");
+    const closeEditModal = document.getElementById("closeEditModal");
+
+    editButtons.forEach((button) => {
+      button.onclick = function () {
+        const userId = button.getAttribute("data-id");
+        const userName = button.getAttribute("data-name");
+        const userEmail = button.getAttribute("data-email");
+        const userRole = button.getAttribute("data-role");
+        const userEnterpriseId = button.getAttribute("data-enterpriseId");
+
+        document.getElementById("editName").value = userName;
+        document.getElementById("editEmail").value = userEmail;
+        document.getElementById("editRole").value = userRole;
+        document.getElementById("editEnterpriseId").value = userEnterpriseId;
+
+        const editForm = document.getElementById("editForm");
+        editForm.action = `/api/user/${userId}`;
+
+        const errorElements = document.querySelectorAll(".error");
+        errorElements.forEach((el) => (el.textContent = ""));
+        editModal.style.display = "block";
+      };
+    });
+
+    closeEditModal.onclick = function () {
+      editModal.style.display = "none";
+    };
+
+    window.onclick = function (event) {
+      if (event.target === editModal) {
+        editModal.style.display = "none";
+      }
+    };
+
+    async function removeUser(id, enterpriseId, loginUserId) {
+      if (loginUserId === id) {
+        alert("You cant remove yourself");
+        return;
+      }
+      // console.log("------id , eId",id,enterpriseId)
+      if (confirm("Are you sure you want to remove this user?")) {
+        try {
+          const response = await fetch(`/user/remove/${id}`, {
+            method: "DELETE",
+            body: JSON.stringify({ id, enterpriseId, addedBy: "superAdmin" }),
+          });
+
+          alert("User removed successfully.");
+          window.location.reload(); 
+        } catch (error) {
+          alert("An error occurred while removing the user.");
+        }
+      }
+    }
+
+
+    async function validateUserAddForm(event) {
+      event.preventDefault();
+
+      document.querySelectorAll(".error").forEach((el) => (el.textContent = ""));
+
+      const nameInput = document.getElementById("name");
+      const emailInput = document.getElementById("email");
+      const passwordInput = document.getElementById("password");
+      const roleInput = document.getElementById("role");
+      const enterpriseIdInput = document.getElementById("enterpriseId").value;
+      const addedBy = document.getElementById("addedBy").value;
+      let valid = true;
+      console.log("----idd", enterpriseIdInput);
+
+      if (!nameInput.value) {
+        valid = false;
+        document.getElementById("nameError").textContent =
+          "Name is required.";
+      }
+      if (!emailInput.value) {
+        valid = false;
+        document.getElementById("emailError").textContent =
+          "Email is required.";
+      } else if (!/\S+@\S+\.\S+/.test(emailInput.value)) {
+        valid = false;
+        document.getElementById("emailError").textContent =
+          "Invalid email format.";
+      }
+      if (!passwordInput.value) {
+        valid = false;
+        document.getElementById("passwordError").textContent =
+          "Password is required.";
+      } else if (passwordInput.value.length < 6) {
+        valid = false;
+        document.getElementById("passwordError").textContent =
+          "Password must be at least 6 characters.";
+      }
+      if (roleInput.value === "") {
+        valid = false;
+        document.getElementById("roleError").textContent =
+          "Role is required.";
+      }
+
+      if (valid) {
+        const formData = {
+          name: nameInput.value,
+          email: emailInput.value,
+          password: passwordInput.value,
+          role: roleInput.value,
+          enterpriseId: enterpriseIdInput,
+          addedBy: addedBy,
+        };
+
+        const response = await fetch("/api/addUser", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json", 
+          },
+          body: JSON.stringify(formData),
+        })
+          .then((response) => response.json())
+          .then((data) => {
+            if (data.success) {
+              window.location.reload();
+            } else {
+              alert(data.message);
+            }
+
+          })
+          .catch((error) => console.error("Error:", error));
+      }
+    }
+
+    function validateUserEditForm(event) {
+      const errorElements = document.querySelectorAll(".error");
+      errorElements.forEach((el) => (el.textContent = ""));
+
+      const edtNameInput = document.getElementById("editName");
+      const edtEmailInput = document.getElementById("editEmail");
+      const edtRoleInput = document.getElementById("editRole");
+      let valid = true;
+
+      if (!edtNameInput.value) {
+        valid = false;
+        document.getElementById("nameError2").textContent =
+          "Name is required.";
+      }
+
+      if (!edtEmailInput.value) {
+        valid = false;
+        document.getElementById("emailError2").textContent =
+          "Email is required.";
+      } else if (!/\S+@\S+\.\S+/.test(edtEmailInput.value)) {
+        valid = false;
+        document.getElementById("emailError2").textContent =
+          "Invalid email format.";
+      }
+
+      if (edtRoleInput.value === "") {
+        valid = false;
+        document.getElementById("roleError2").textContent =
+          "Role is required.";
+      }
+
+      if (!valid) {
+        event.preventDefault();
+      }
+    }
+  </script>
+</body>
+
+</html>

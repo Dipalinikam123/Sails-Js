@@ -1,0 +1,35 @@
+/* body {
+  height: 100vh;
+}
+
+a {
+  text-decoration: none;
+}
+
+ul {
+  list-style: none;
+}
+
+.default-page ul {
+  display: flex;
+  justify-content: center;
+  gap: 40px;
+  margin: 0;
+  padding: 10px 0px;
+}
+
+.default-page ul li a {
+  font-weight: bold;
+  font-size: 20px;
+}
+
+header {
+  background-color: bisque;
+}
+
+footer {
+  background-color: blanchedalmond;
+  position: fixed;
+  bottom: 0;
+  width: 100%;
+} */

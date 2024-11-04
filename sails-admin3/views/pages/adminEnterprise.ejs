@@ -1,0 +1,521 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Admin Enterprise</title>
+  <style>
+    h1 {
+      color: #333;
+      text-align: center;
+      margin-bottom: 20px;
+    }
+
+    h2 {
+      color: #555;
+      margin-top: 20px;
+    }
+
+    .ul-container {
+      list-style-type: none;
+      padding: 0;
+    }
+
+    .ul-container li {
+      background: #fff;
+      margin: 10px 0;
+      padding: 10px;
+      border-radius: 5px;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    }
+
+    strong {
+      color: #222;
+    }
+
+    a {
+      color: #007BFF;
+      text-decoration: none;
+    }
+
+    a:hover {
+      text-decoration: underline;
+    }
+
+    .logo {
+      max-width: 100px;
+      max-height: 100px;
+      display: block;
+      margin: 10px 0;
+    }
+
+    table {
+      width: 80%;
+      border-collapse: collapse;
+      margin: 20px auto;
+      background-color: #fff;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    }
+
+    th,
+    td {
+      padding: 12px;
+      text-align: center;
+      border-bottom: 1px solid #ddd;
+    }
+
+    th {
+      background-color: #4CAF50;
+      color: white;
+    }
+
+    tr:nth-child(even) {
+      background-color: #f2f2f2;
+    }
+
+    tr:hover {
+      background-color: #e0e0e0;
+    }
+
+    .button {
+      display: inline-block;
+      padding: 10px 15px;
+      background-color: #007BFF;
+      color: white;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+
+    .button:hover {
+      background-color: #0056b3;
+    }
+
+    /* Modal Styling */
+    .modal {
+      display: none;
+      position: fixed;
+      z-index: 1;
+      left: 0;
+      top: 0;
+      width: 100%;
+      height: 100%;
+      overflow: auto;
+      background-color: rgba(0, 0, 0, 0.4);
+    }
+
+    .modal-content {
+      background-color: #fefefe;
+      margin: 15% auto;
+      padding: 32px;
+      border: 1px solid #888;
+      width: 30%;
+      border-radius: 8px;
+    }
+
+    .close {
+      color: #aaa;
+      float: right;
+      font-size: 28px;
+      font-weight: bold;
+    }
+
+    .close:hover,
+    .close:focus {
+      color: black;
+      text-decoration: none;
+      cursor: pointer;
+    }
+
+    h1 {
+      text-align: center;
+      color: #333;
+    }
+
+    label {
+      display: block;
+      margin-bottom: 5px;
+      color: #555;
+    }
+
+    input[type="text"],
+    input[type="email"],
+    input[type="password"],
+    select {
+      width: 100%;
+      padding: 10px;
+      margin-bottom: 5px;
+      /* Reduced margin to fit error message */
+      border: 1px solid #ccc;
+      border-radius: 4px;
+      box-sizing: border-box;
+    }
+
+    .login-container span {
+      margin-bottom: 20px;
+    }
+
+    .error {
+      color: red;
+      font-size: 12px;
+    }
+
+    .submit-btn {
+      padding: 10px 15px;
+      background-color: #4caf50;
+      color: white;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+  </style>
+</head>
+
+<body>
+
+  <h2>Enterprise Details</h2>
+  <ul class="ul-container">
+    <!-- <li><strong>ID:</strong>
+      <%= enterprise.id %>
+    </li> -->
+    <li><strong>Name:</strong>
+      <%= enterprise.name %>
+    </li>
+    <li><strong>Logo:</strong>
+      <a href="<%= enterprise.logo %>" target="_blank">
+        <img class="logo" src="<%= enterprise.logo %>" alt="Logo" />
+      </a>
+    </li>
+    <li><strong>Employee Count:</strong>
+      <%= enterprise.employeeCount %>
+    </li>
+    <li><strong>Manager:</strong>
+      <ul>
+        <li><strong>Name:</strong>
+          <%= enterprise.manager.name %>
+        </li>
+        <li><strong>Email:</strong>
+          <%= enterprise.manager.email %>
+        </li>
+        <li><strong>Department:</strong>
+          <%= enterprise.manager.department %>
+        </li>
+      </ul>
+    </li>
+  </ul>
+
+  <button id="addUserBtn" class="button">Add Users</button>
+
+  <!-- Users Table -->
+  <table id="usersTable">
+    <thead>
+      <tr>
+        <!-- <th>ID</th> -->
+        <th>Name</th>
+        <th>Email</th>
+        <th>Role</th>
+        <!-- <th>Enterprise ID</th> -->
+        <th>Edit</th>
+        <th>Remove</th>
+      </tr>
+    </thead>
+    <tbody>
+      <% user.map(user=> { %>
+        <tr>
+          <td>
+            <%= user.name %>
+          </td>
+          <td>
+            <%= user.email %>
+          </td>
+          <td>
+            <%= user.role===0 ? 'SuperAdmin' : user.role===1 ? 'Admin' :'User' %>
+          </td>
+
+          <td>
+            <button class="editProfileBtn submit-btn" data-id="<%= user.id %>" data-name="<%= user.name %>"
+              data-email="<%= user.email %>" data-role="<%= user.role %>" data-enterpriseId="<%= user.enterpriseId %>"
+              data-login-user="<%= loginUser.role %>">Edit</button>
+          </td>
+          <td> <button class="removeUserBtn submit-btn"
+              onclick="removeUser('<%= user.id %>','<%= user.enterpriseId %>','<%= user.role %>','<%= loginUser.role %>','<%= loginUser.id %>')">Remove</button>
+          </td>
+        </tr>
+        <% }); %>
+    </tbody>
+  </table>
+
+
+  <!-- HTML for the Add User Modal -->
+  <div id="userModal" class="modal">
+    <div class="modal-content">
+      <span class="close">&times;</span>
+      <h2>Add User</h2>
+      <form onsubmit="UserAddForm(event)">
+        <label for="name">Name:</label>
+        <input type="text" id="name" name="name"><br>
+        <span id="nameError" class="error"></span>
+
+        <label for="email">Email:</label>
+        <input type="text" id="email" name="email"><br>
+        <span id="emailError" class="error"></span>
+
+        <label for="password">Password:</label>
+        <input type="password" id="password" name="password"><br>
+        <span id="passwordError" class="error"></span>
+
+        <label for="role">Role:</label>
+        <select id="role" name="role">
+          <option value="">Select a Role</option>
+          <% [1, 2].map((role)=> { %>
+            <option value="<%= role %>">
+              <%= role===1 ? 'Admin' : 'User' %>
+            </option>
+            <% }) %>
+        </select>
+        <span id="roleError" class="error"></span><br>
+
+        <input type="hidden" id="enterpriseId" name="enterpriseId" value="<%= enterprise.id %>" readonly required>
+        <input type="hidden" id="addedBy" name="addedBy" value="admin"><br>
+        <button type="submit" class="submit-btn">Submit</button>
+      </form>
+    </div>
+  </div>
+
+
+  <!-- edit user model -->
+  <div id="editModal" class="modal">
+    <div class="modal-content">
+      <span class="close" id="closeEditModal">&times;</span>
+      <h2>Edit Profile</h2>
+      <form id="editForm" method="POST" onsubmit="validateUserEditForm(event)">
+        <label for="editName">Name:</label>
+        <input type="text" id="editName" name="name">
+        <span id="nameError2" class="error"></span>
+
+        <label for="editEmail">Email:</label>
+        <input type="text" id="editEmail" name="email">
+        <span id="emailError2" class="error"></span>
+
+        <label for="editRole">Role:</label>
+        <select id="editRole" name="role">
+          <% [0, 1, 2].forEach((role)=> { %>
+            <option value="<%= role %>" <%=(loginUser.role !==0 && role===0) ? 'disabled' : '' %>>
+              <%= role===0 ? 'SuperAdmin' : role===1 ? 'Admin' : 'User' %>
+            </option>
+            <% }) %>
+        </select><br>
+        <span id="roleError2" class="error"></span><br>
+        <input type="hidden" id="editEnterpriseId" name="enterpriseId" value="<%=enterprise.enterpriseId %>" required>
+        <input type="hidden" id="addedBy" name="addedBy" value="admin">
+        <button type="submit" class="button" style="background-color: #28a745;">Save Changes</button>
+      </form>
+    </div>
+  </div>
+
+  <script>
+    const modal = document.getElementById("userModal");
+    const btn = document.getElementById("addUserBtn");
+    const closeButtons = document.getElementsByClassName("close");
+
+    btn.onclick = function () {
+      document.getElementById('name').value = '';
+      document.getElementById('email').value = '';
+      document.getElementById('password').value = '';
+      document.getElementById('role').value = '';
+      modal.style.display = "block";
+    };
+
+    for (let closeButton of closeButtons) {
+      closeButton.onclick = function () {
+        modal.style.display = "none";
+        editModal.style.display = "none";
+
+        document.getElementById('name').value = '';
+        document.getElementById('email').value = '';
+        document.getElementById('password').value = '';
+        document.getElementById('role').value = '';
+        const errorElements = document.querySelectorAll('.error');
+        errorElements.forEach(el => el.textContent = '');
+      };
+    }
+
+    window.onclick = function (event) {
+      if (event.target == modal || event.target == editModal) {
+        modal.style.display = "none";
+        editModal.style.display = "none";
+      }
+    };
+
+
+    function validateUserEditForm(event) {
+      const errorElements = document.querySelectorAll('.error');
+      errorElements.forEach(el => el.textContent = '');
+
+      const edtNameInput = document.getElementById('editName');
+      const edtEmailInput = document.getElementById('editEmail');
+      const edtRoleInput = document.getElementById('editRole');
+      let valid = true;
+
+      if (!edtNameInput.value) {
+        valid = false;
+        document.getElementById('nameError2').textContent = 'Name is required.';
+      }
+
+      if (!edtEmailInput.value) {
+        valid = false;
+        document.getElementById('emailError2').textContent = 'Email is required.';
+      } else if (!/\S+@\S+\.\S+/.test(edtEmailInput.value)) {
+        valid = false;
+        document.getElementById('emailError2').textContent = 'Invalid email format.';
+      }
+
+      if (edtRoleInput.value === "") {
+        valid = false;
+        document.getElementById('roleError2').textContent = 'Role is required.';
+      }
+
+      if (!valid) {
+        event.preventDefault();
+      }
+    }
+
+    document.addEventListener('click', function (event) {
+      if (event.target.classList.contains("editProfileBtn")) {
+        const button = event.target;
+        const userId = button.getAttribute("data-id");
+        const userName = button.getAttribute("data-name");
+        const userEmail = button.getAttribute("data-email");
+        const userRole = button.getAttribute("data-role");
+        const userEnterpriseId = button.getAttribute("data-enterpriseId");
+        const loginUser = button.getAttribute("data-login-user");
+
+        document.getElementById("editName").value = userName;
+        document.getElementById("editEmail").value = userEmail;
+        document.getElementById("editRole").value = userRole;
+        document.getElementById("editEnterpriseId").value = userEnterpriseId;
+
+        const editForm = document.getElementById("editForm");
+        editForm.action = `/api/user/${userId}`;
+
+        if (loginUser !== '0' && userRole === '0') {
+          editModal.style.display = "none";
+          alert("Admin can't edit a SuperAdmin")
+        } else {
+          editModal.style.display = "block";
+        }
+      }
+    });
+
+    async function removeUser(id, enterpriseId, userRole, loginRole, loginUserId) {
+      const userRoleNumber = Number(userRole);
+      const loginRoleNumber = Number(loginRole);
+
+      // console.log("------id-----------loginUserId", loginUserId);
+      if (loginUserId === id) {
+        alert('You cant remove yourself')
+        return
+      }
+      if (userRoleNumber === 0 && loginRoleNumber !== 0) {
+        alert("Admin can't  remove a SuperAdmin")
+      }
+      else {
+        if (confirm('Are you sure you want to remove this user?')) {
+          try {
+            const response = await fetch(`/user/remove/${id}`, {
+              method: 'DELETE',
+              headers: {
+                'Content-Type': 'application/json',
+              },
+              body: JSON.stringify({ id, enterpriseId, addedBy: 'admin' }),
+            });
+
+            alert('User removed successfully.');
+            window.location.reload();
+          } catch (error) {
+            console.error('Error:', error);
+            alert('An error occurred while removing the user.');
+          }
+        }
+      }
+    }
+
+
+    async function UserAddForm(event) {
+      event.preventDefault();
+
+      document.querySelectorAll('.error').forEach(el => el.textContent = '');
+
+      const nameInput = document.getElementById('name');
+      const emailInput = document.getElementById('email');
+      const passwordInput = document.getElementById('password');
+      const roleInput = document.getElementById('role');
+      const enterpriseIdInput = document.getElementById('enterpriseId');
+      const addedBy = document.getElementById('addedBy');
+      let valid = true;
+
+      if (!nameInput.value) {
+        valid = false;
+        document.getElementById('nameError').textContent = 'Name is required.';
+      }
+      if (!emailInput.value) {
+        valid = false;
+        document.getElementById('emailError').textContent = 'Email is required.';
+      } else if (!/\S+@\S+\.\S+/.test(emailInput.value)) {
+        valid = false;
+        document.getElementById('emailError').textContent = 'Invalid email format.';
+      }
+      if (!passwordInput.value) {
+        valid = false;
+        document.getElementById('passwordError').textContent = 'Password is required.';
+      } else if (passwordInput.value.length < 6) {
+        valid = false;
+        document.getElementById('passwordError').textContent = 'Password must be at least 6 characters.';
+      }
+      if (roleInput.value === "") {
+        valid = false;
+        document.getElementById('roleError').textContent = 'Role is required.';
+      }
+
+      if (valid) {
+        const formData = {
+          name: nameInput.value,
+          email: emailInput.value,
+          password: passwordInput.value,
+          role: roleInput.value,
+          enterpriseId: enterpriseIdInput.value,
+          addedBy: addedBy.value,
+        };
+
+
+        const response = await fetch('/api/addUser', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(formData),
+        })
+
+          .then(response => response.json())
+          .then(data => {
+            if (data.success) {
+              if (data.reload) {
+                window.location.reload();
+              } else {
+                alert(data.message);
+              }
+            } else {
+              alert(data.message);
+            }
+          })
+          .catch(error => console.error('Error:', error));
+      }
+    }
+
+  </script>
+
+
+</body>
+
+</html>
